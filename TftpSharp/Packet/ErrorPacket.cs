@@ -5,18 +5,6 @@ namespace TftpSharp.Packet
 {
     internal class ErrorPacket : Packet
     {
-        public enum ErrorCode
-        {
-            Undefined, 
-            FileNotFound, 
-            AccessViolation, 
-            DiskFullOrAllocationExceeded, 
-            IllegalTftpOperation, 
-            UnknownTransferId, 
-            FileAlreadyExists, 
-            NoSuchUser,
-        }
-
         public ErrorCode Code { get; }
         public string ErrorMessage { get; }
 
