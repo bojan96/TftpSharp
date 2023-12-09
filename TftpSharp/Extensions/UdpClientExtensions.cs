@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System;
+using System.Linq.Expressions;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,8 +13,8 @@ namespace TftpSharp.Extensions
             IPEndPoint endpoint,
             CancellationToken cancellationToken = default)
         {
-            byte[] packetBytes = packet.Serialize();
-            int bytesSent = 0;
+            var packetBytes = packet.Serialize();
+            var bytesSent = 0;
             while (bytesSent < packetBytes.Length)
             {
                 bytesSent = await client.SendAsync(packetBytes, endpoint, cancellationToken);

@@ -1,5 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -34,50 +37,163 @@ namespace TftpSharp.Client
                 throw new TftpException($"{_host}:No such host is known");
 
             var sessionHostIp = ipAddresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork)!;
-            await _udpClient.SendTftpPacketAsync(new ReadRequestPacket(_filename, _transferMode),
-                new IPEndPoint(sessionHostIp, 69), cancellationToken);
 
-            var initialRrqResponse = await _udpClient.ReceiveFromAddressAsync(sessionHostIp, cancellationToken);
-            var initialResponsePacket = ParseReceivingPacket(initialRrqResponse.Buffer);
+            var (initialPacket, initialRemoteEndpoint) = await SendAndReceiveWithRetry(new ReadRequestPacket(_filename, _transferMode), new IPEndPoint(sessionHostIp, 69), async token =>
+            {
+                bool retry;
+                Packet.Packet? packet = null;
+                var result = new UdpReceiveResult();
 
-            if (initialResponsePacket is ErrorPacket errPacket)
+                do
+                {
+                    try
+                    {
+                        result = await _udpClient.ReceiveFromAddressAsync(sessionHostIp, token);
+                        packet = PacketParser.Parse(result.Buffer);
+
+                        if (packet is not ErrorPacket && packet is not DataPacket)
+                            retry = true;
+                        else
+                            retry = false;
+                    }
+                    catch (TftpInvalidPacketException)
+                    {
+                        retry = true;
+                    }
+                } while (retry);
+                
+
+                return (packet!, result.RemoteEndPoint);
+            }, 3000, 5,cancellationToken);
+
+            if (initialPacket is ErrorPacket errPacket)
                 throw new TftpErrorResponseException(errPacket.Code, errPacket.ErrorMessage);
 
-            var lastRecvDataPacket = (DataPacket)initialResponsePacket;
+            var lastRecvDataPacket = (DataPacket)initialPacket;
             await _stream.WriteAsync(lastRecvDataPacket.Data, cancellationToken);
 
-            var transferId = initialRrqResponse.RemoteEndPoint.Port;
+            var transferId = initialRemoteEndpoint.Port;
             var remoteEndpoint = new IPEndPoint(sessionHostIp, transferId);
-            var lastAckBlock = lastRecvDataPacket.BlockNumber;
-
-            await _udpClient.SendTftpPacketAsync(new AckPacket(lastAckBlock), remoteEndpoint, cancellationToken);
 
             while (lastRecvDataPacket.Data.Length == 512)
             {
-                var udpResult = await _udpClient.ReceiveFromAsync(remoteEndpoint, cancellationToken);
-                var packet = ParseReceivingPacket(udpResult.Buffer);
-                if (packet is ErrorPacket errorPacket)
+
+                var (recvPacket, _) = await SendAndReceiveWithRetry(new AckPacket(lastRecvDataPacket.BlockNumber), remoteEndpoint,
+                    async token =>
+                    {
+                        bool retry;
+                        Packet.Packet? packet = null;
+                        var result = new UdpReceiveResult();
+
+                        do
+                        {
+                            try
+                            {
+                                result = await _udpClient.ReceiveFromAsync(remoteEndpoint, token);
+                                packet = PacketParser.Parse(result.Buffer);
+
+                                if (packet is not ErrorPacket && packet is not DataPacket)
+                                    retry = true;
+                                else if (packet is DataPacket dataPacket &&
+                                         dataPacket.BlockNumber <= lastRecvDataPacket.BlockNumber)
+                                    retry = true;
+                                else
+                                    retry = false;
+                            }
+                            catch (TftpInvalidPacketException)
+                            {
+                                retry = true;
+                            }
+                        } while (retry);
+
+                        return (packet!, result.RemoteEndPoint);
+                    }, 3000, 5, cancellationToken);
+
+                if (recvPacket is ErrorPacket errorPacket)
                     throw new TftpErrorResponseException(errorPacket.Code, errorPacket.ErrorMessage);
 
-                var recvDataPacket = (DataPacket)packet;
-                if(recvDataPacket.BlockNumber <= lastAckBlock)
-                    continue;
-
+                var recvDataPacket = (DataPacket)recvPacket;
                 await _stream.WriteAsync(recvDataPacket.Data, cancellationToken);
-                await _udpClient.SendTftpPacketAsync(new AckPacket(recvDataPacket.BlockNumber), remoteEndpoint, cancellationToken);
-                lastAckBlock = recvDataPacket.BlockNumber;
                 lastRecvDataPacket = recvDataPacket;
             }
 
+
+            await SendAndReceiveWithRetry(new AckPacket(lastRecvDataPacket.BlockNumber), remoteEndpoint,
+                async token =>
+                {
+                    bool retry;
+                    Packet.Packet? packet = null;
+                    var result = new UdpReceiveResult();
+
+                    do
+                    {
+                        try
+                        {
+                            result = await _udpClient.ReceiveFromAsync(remoteEndpoint, token);
+                            packet = PacketParser.Parse(result.Buffer);
+
+                            if (packet is not DataPacket)
+                                retry = true;
+                            else if (packet is DataPacket dataPacket &&
+                                     dataPacket.BlockNumber < lastRecvDataPacket.BlockNumber)
+                                retry = true;
+                            else
+                                retry = false;
+                        }
+                        catch (TftpInvalidPacketException)
+                        {
+                            retry = true;
+                        }
+                    } while (retry);
+
+                    return (packet!, result.RemoteEndPoint);
+                }, 3000, 1,cancellationToken);
+
         }
 
-        private Packet.Packet ParseReceivingPacket(byte[] packetBytes)
+        private async Task<(Packet.Packet receivedPacket, IPEndPoint remoteEndpoint)> SendAndReceiveWithRetry(
+            Packet.Packet packet, IPEndPoint endpoint, Func<CancellationToken, Task<(Packet.Packet packet, IPEndPoint endpoint)>> receiveOperation, 
+            int timeout, int transmitAttempts, CancellationToken cancellationToken = default)
         {
-            var initialRrqPacket = PacketParser.Parse(packetBytes);
-            if (initialRrqPacket is not DataPacket && initialRrqPacket is not ErrorPacket)
-                throw new TftpInvalidPacketException("Invalid packet received");
+            bool retry;
+            IPEndPoint? recvEndpoint = null;
+            Packet.Packet? receivedPacket = null;
 
-            return initialRrqPacket;
+
+            do
+            {
+                try
+                {
+                    await _udpClient.SendTftpPacketAsync(packet, endpoint, cancellationToken);
+                    (receivedPacket, recvEndpoint)  = await WithTimeout(receiveOperation, timeout, cancellationToken);
+                    if (receivedPacket is ErrorPacket errPacket)
+                        throw new TftpErrorResponseException(errPacket.Code, errPacket.ErrorMessage);
+
+                    retry = false;
+                }
+                catch (ReceiveTimeoutException)
+                {
+                    retry = true;
+                }
+
+            } while (retry && --transmitAttempts > 0);
+
+            return (receivedPacket!, recvEndpoint!);
+        }
+
+        public static async Task<TResult> WithTimeout<TResult>(Func<CancellationToken, Task<TResult>> operation, int timeout, CancellationToken cancellationToken = default)
+        {
+            using var rcvTaskCancellationSource = new CancellationTokenSource();
+            cancellationToken.Register(() => rcvTaskCancellationSource.Cancel());
+            var receiveTask = operation(rcvTaskCancellationSource.Token);
+            var timeoutTask = Task.Delay(timeout, cancellationToken);
+
+            var resultTask = await Task.WhenAny(receiveTask, timeoutTask);
+            if (resultTask == receiveTask)
+                return await receiveTask;
+
+            rcvTaskCancellationSource.Cancel();
+            throw new ReceiveTimeoutException();
         }
 
     }
