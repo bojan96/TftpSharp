@@ -155,7 +155,7 @@ namespace TftpSharp.Client
         public static async Task<TResult> WithTimeout<TResult>(Func<CancellationToken, Task<TResult>> operation, int timeout, CancellationToken cancellationToken = default)
         {
             using var rcvTaskCancellationSource = new CancellationTokenSource();
-            cancellationToken.Register(() => rcvTaskCancellationSource.Cancel());
+            await using var cancellationTokenRegistration = cancellationToken.Register(() => rcvTaskCancellationSource.Cancel());
             var receiveTask = operation(rcvTaskCancellationSource.Token);
             var timeoutTask = Task.Delay(timeout, cancellationToken);
 
