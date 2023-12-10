@@ -26,7 +26,7 @@ namespace TftpSharp.Extensions
             UdpReceiveResult result;
             do
             {
-                result = await client.ReceiveAsync(cancellationToken);
+                result = await client.ReceiveAndIgnoreConnectResetAsync(cancellationToken);
             } while (!result.RemoteEndPoint.Address.Equals(address));
 
             return result;
@@ -37,8 +37,30 @@ namespace TftpSharp.Extensions
             UdpReceiveResult result;
             do
             {
-                result = await client.ReceiveAsync(cancellationToken);
+                result = await client.ReceiveAndIgnoreConnectResetAsync(cancellationToken);
             } while (!result.RemoteEndPoint.Equals(endpoint));
+
+            return result;
+        }
+
+        private static async Task<UdpReceiveResult> ReceiveAndIgnoreConnectResetAsync(this UdpClient client, CancellationToken cancellationToken = default)
+        {
+            var result = new UdpReceiveResult();
+            bool retry;
+            do
+            {
+                try
+                {
+                    result = await client.ReceiveAsync(cancellationToken);
+                    retry = false;
+                }
+                // On Windows if udp send fails then ICMP Port Unreachable is received.
+                // This causes ReceiveAsync to throw ConnectionReset exception (even though UDP has no concept of "connection")
+                catch (SocketException e) when (e.SocketErrorCode == SocketError.ConnectionReset)
+                {
+                    retry = true;
+                }
+            } while (retry);
 
             return result;
         }
