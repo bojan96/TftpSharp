@@ -137,9 +137,6 @@ namespace TftpSharp.Client
                 {
                     await _udpClient.SendTftpPacketAsync(packet, endpoint, cancellationToken);
                     (receivedPacket, recvEndpoint) = await WithTimeout(receiveOperation, timeout, cancellationToken);
-                    if (receivedPacket is ErrorPacket errPacket)
-                        throw new TftpErrorResponseException(errPacket.Code, errPacket.ErrorMessage);
-
                     retry = false;
                 }
                 catch (ReceiveTimeoutException)
