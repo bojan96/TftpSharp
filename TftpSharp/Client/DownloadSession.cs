@@ -117,37 +117,7 @@ namespace TftpSharp.Client
                 lastRecvDataPacket = recvDataPacket;
             }
 
-
-            await SendAndReceiveWithRetry(new AckPacket(lastRecvDataPacket.BlockNumber), remoteEndpoint,
-                async token =>
-                {
-                    bool retry;
-                    Packet.Packet? packet = null;
-                    var result = new UdpReceiveResult();
-
-                    do
-                    {
-                        try
-                        {
-                            result = await _udpClient.ReceiveFromAsync(remoteEndpoint, token);
-                            packet = PacketParser.Parse(result.Buffer);
-
-                            if (packet is not DataPacket)
-                                retry = true;
-                            else if (packet is DataPacket dataPacket &&
-                                     dataPacket.BlockNumber < lastRecvDataPacket.BlockNumber)
-                                retry = true;
-                            else
-                                retry = false;
-                        }
-                        catch (TftpInvalidPacketException)
-                        {
-                            retry = true;
-                        }
-                    } while (retry);
-
-                    return (packet!, result.RemoteEndPoint);
-                }, 3000, 1,cancellationToken);
+            await AckAndDally(lastRecvDataPacket.BlockNumber, remoteEndpoint, cancellationToken);
 
         }
 
@@ -158,6 +128,7 @@ namespace TftpSharp.Client
             bool retry;
             IPEndPoint? recvEndpoint = null;
             Packet.Packet? receivedPacket = null;
+            var attempts = transmitAttempts;
 
 
             do
@@ -165,7 +136,7 @@ namespace TftpSharp.Client
                 try
                 {
                     await _udpClient.SendTftpPacketAsync(packet, endpoint, cancellationToken);
-                    (receivedPacket, recvEndpoint)  = await WithTimeout(receiveOperation, timeout, cancellationToken);
+                    (receivedPacket, recvEndpoint) = await WithTimeout(receiveOperation, timeout, cancellationToken);
                     if (receivedPacket is ErrorPacket errPacket)
                         throw new TftpErrorResponseException(errPacket.Code, errPacket.ErrorMessage);
 
@@ -176,7 +147,10 @@ namespace TftpSharp.Client
                     retry = true;
                 }
 
-            } while (retry && --transmitAttempts > 0);
+            } while (retry && --attempts > 0);
+
+            if(attempts == 0)
+                throw new TftpTimeoutException(transmitAttempts);
 
             return (receivedPacket!, recvEndpoint!);
         }
@@ -196,5 +170,57 @@ namespace TftpSharp.Client
             throw new ReceiveTimeoutException();
         }
 
+        private async Task AckAndDally(ushort ackBlock, IPEndPoint remoteEndpoint, CancellationToken cancellationToken = default)
+        {
+            bool resend;
+
+            do
+            {
+                await _udpClient.SendTftpPacketAsync(new AckPacket(ackBlock), remoteEndpoint,
+                    cancellationToken);
+                try
+                {
+                    var finalResult =
+                        await WithTimeout(async token =>
+                            {
+                                bool retry;
+                                Packet.Packet? packet = null;
+
+                                do
+                                {
+                                    try
+                                    {
+                                        var result = await _udpClient.ReceiveFromAsync(remoteEndpoint, token);
+                                        packet = PacketParser.Parse(result.Buffer);
+                                        if (packet is not DataPacket)
+                                            retry = true;
+                                        else if (packet is DataPacket dataPacket &&
+                                                 dataPacket.BlockNumber == ackBlock)
+                                            retry = false;
+                                        else
+                                            retry = true;
+
+                                    }
+                                    catch (TftpInvalidPacketException)
+                                    {
+                                        retry = true;
+                                    }
+
+                                } while (retry);
+
+                                return packet;
+                            }, 3000,
+                            cancellationToken);
+
+                    resend = true;
+                }
+                catch (ReceiveTimeoutException e)
+                {
+                    resend = false;
+                }
+
+            } while (resend);
+
+        }
     }
 }
