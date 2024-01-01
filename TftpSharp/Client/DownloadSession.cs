@@ -30,11 +30,7 @@ namespace TftpSharp.Client
 
         public async Task Start(CancellationToken cancellationToken = default)
         {
-            var ipAddresses = await Dns.GetHostAddressesAsync(_host, cancellationToken);
-            if (ipAddresses.Length == 0)
-                throw new TftpException($"{_host}:No such host is known");
-
-            var sessionHostIp = ipAddresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork)!;
+            var sessionHostIp = await ResolveHostAsync(_host, cancellationToken);
 
             var (initialPacket, initialRemoteEndpoint) = await SendAndReceiveWithRetry(new ReadRequestPacket(_filename, _transferMode), new IPEndPoint(sessionHostIp, 69), async token =>
             {
