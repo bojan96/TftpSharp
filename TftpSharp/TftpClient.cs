@@ -27,6 +27,11 @@ namespace TftpSharp
             => await new DownloadSession(_udpClient, Host, remoteFilename, TransferMode.Octet, stream).Start(
                 cancellationToken);
 
+        public async Task UploadStreamAsync(string remoteFilename, Stream stream,
+            CancellationToken cancellationToken = default)
+            => await new UploadSession(_udpClient, Host, remoteFilename, TransferMode.Octet, stream).Start(
+                cancellationToken);
+
         public void Dispose()
         {
             _udpClient.Dispose();
