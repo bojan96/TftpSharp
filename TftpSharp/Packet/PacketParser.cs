@@ -35,7 +35,7 @@ namespace TftpSharp.Packet
                         throw new TftpInvalidPacketException("ERROR: Missing null terminator");
 
                     return new ErrorPacket((ErrorCode)Packet.BytesToUshort(packetBytes[2..4]),
-                        Encoding.UTF8.GetString(packetBytes[4..result.Index]));
+                        Encoding.UTF8.GetString(packetBytes[4..(result.Index + 4)]));
                 default:
                     throw new TftpInvalidPacketException("Invalid packet");
             }
