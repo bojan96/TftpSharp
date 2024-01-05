@@ -19,13 +19,15 @@ namespace TftpSharp.Client
         private readonly string _filename;
         private readonly TransferMode _transferMode;
         private readonly Stream _stream;
+        private readonly int _timeout;
 
-        public DownloadSession(UdpClient udpClient, string host, string filename, TransferMode transferMode, Stream stream) : base(udpClient)
+        public DownloadSession(UdpClient udpClient, string host, string filename, TransferMode transferMode, Stream stream, int timeout) : base(udpClient)
         {
             _host = host;
             _filename = filename;
             _transferMode = transferMode;
             _stream = stream;
+            _timeout = timeout;
         }
 
         public async Task Start(CancellationToken cancellationToken = default)
@@ -58,7 +60,7 @@ namespace TftpSharp.Client
                 
 
                 return (packet!, result.RemoteEndPoint);
-            }, 3000, 5,cancellationToken);
+            }, _timeout, 5,cancellationToken);
 
             if (initialPacket is ErrorPacket errPacket)
                 throw new TftpErrorResponseException(errPacket.Code, errPacket.ErrorMessage);
@@ -101,7 +103,7 @@ namespace TftpSharp.Client
                         } while (retry);
 
                         return (packet!, result.RemoteEndPoint);
-                    }, 3000, 5, cancellationToken);
+                    }, _timeout, 5, cancellationToken);
 
                 if (recvPacket is ErrorPacket errorPacket)
                     throw new TftpErrorResponseException(errorPacket.Code, errorPacket.ErrorMessage);
@@ -154,7 +156,7 @@ namespace TftpSharp.Client
                                 } while (retry);
 
                                 return packet;
-                            }, 3000,
+                            }, _timeout,
                             cancellationToken);
 
                     resend = true;

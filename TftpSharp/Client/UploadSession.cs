@@ -15,13 +15,15 @@ namespace TftpSharp.Client
         private readonly string _filename;
         private readonly TransferMode _transferMode;
         private readonly Stream _stream;
+        private readonly int _timeout;
 
-        public UploadSession(UdpClient udpClient, string host, string filename, TransferMode transferMode, Stream stream) : base(udpClient)
+        public UploadSession(UdpClient udpClient, string host, string filename, TransferMode transferMode, Stream stream, int timeout) : base(udpClient)
         {
             _host = host;
             _filename = filename;
             _transferMode = transferMode;
             _stream = stream;
+            _timeout = timeout;
         }
 
 
@@ -44,6 +46,8 @@ namespace TftpSharp.Client
 
                         if (packet is not ErrorPacket && packet is not AckPacket)
                             retry = true;
+                        else if(packet is AckPacket ackPacket && ackPacket.BlockNumber != 0)
+                            retry = true;
                         else
                             retry = false;
                     }
@@ -55,7 +59,7 @@ namespace TftpSharp.Client
 
 
                 return (packet!, result.RemoteEndPoint);
-            }, 3000, 5, cancellationToken);
+            }, _timeout, 5, cancellationToken);
 
             if (initialPacket is ErrorPacket errPacket)
                 throw new TftpErrorResponseException(errPacket.Code, errPacket.ErrorMessage);
@@ -88,7 +92,7 @@ namespace TftpSharp.Client
                                 if (packet is not ErrorPacket && packet is not AckPacket)
                                     retry = true;
                                 else if (packet is AckPacket ackPacket &&
-                                         ackPacket.BlockNumber < blockNumber)
+                                         ackPacket.BlockNumber != blockNumber)
                                     retry = true;
                                 else
                                     retry = false;
@@ -100,7 +104,7 @@ namespace TftpSharp.Client
                         } while (retry);
 
                         return (packet!, result.RemoteEndPoint);
-                    }, 3000, 5, cancellationToken);
+                    }, _timeout, 5, cancellationToken);
 
                 if (recvPacket is ErrorPacket errorPacket)
                     throw new TftpErrorResponseException(errorPacket.Code, errorPacket.ErrorMessage);

@@ -16,6 +16,7 @@ namespace TftpSharp
         private readonly UdpClient _udpClient = new();
 
         public string Host { get; }
+        public int Timeout { get; set; } = 3000;
 
         public TftpClient(string host)
         {
@@ -24,12 +25,12 @@ namespace TftpSharp
 
         public async Task DownloadStreamAsync(string remoteFilename, Stream stream,
             CancellationToken cancellationToken = default)
-            => await new DownloadSession(_udpClient, Host, remoteFilename, TransferMode.Octet, stream).Start(
+            => await new DownloadSession(_udpClient, Host, remoteFilename, TransferMode.Octet, stream, Timeout).Start(
                 cancellationToken);
 
         public async Task UploadStreamAsync(string remoteFilename, Stream stream,
             CancellationToken cancellationToken = default)
-            => await new UploadSession(_udpClient, Host, remoteFilename, TransferMode.Octet, stream).Start(
+            => await new UploadSession(_udpClient, Host, remoteFilename, TransferMode.Octet, stream, Timeout).Start(
                 cancellationToken);
 
         public void Dispose()
