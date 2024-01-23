@@ -14,7 +14,6 @@ internal class TftpContext
         TransferMode = transferMode;
         Port = port;
         Host = host;
-        MaxTimeoutAttempts = 5;
     }
 
     public UdpClient Client { get; }
@@ -25,5 +24,5 @@ internal class TftpContext
     public int TransferId { get; set; }
     public IPAddress Host { get; }
     public int Timeout { get; set; } = 3000;
-    public int MaxTimeoutAttempts { get; }
+    public int MaxTimeoutAttempts { get; set; } = 5;
 }
