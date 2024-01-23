@@ -34,7 +34,7 @@ internal class DownloadInitialReceiveState : InitialReceiveState
         }
     }
 
-    public override Task<IState<TftpContext>> HandleTimeoutAsync(TftpContext context,
+    protected override Task<IState<TftpContext>> HandleTimeoutAsync(TftpContext context,
         CancellationToken cancellationToken = default)
         => Task.FromResult<IState<TftpContext>>(_attemptCount == context.MaxTimeoutAttempts
                 ? new TimeoutedState(_attemptCount)

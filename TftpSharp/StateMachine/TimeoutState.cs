@@ -22,10 +22,10 @@ namespace TftpSharp.StateMachine
         }
 
 
-        public abstract Task<IState<TftpContext>> HandleStateAsync(TftpContext context,
+        protected abstract Task<IState<TftpContext>> HandleStateAsync(TftpContext context,
             CancellationToken cancellationToken = default);
 
-        public abstract Task<IState<TftpContext>> HandleTimeoutAsync(TftpContext context,
+        protected abstract Task<IState<TftpContext>> HandleTimeoutAsync(TftpContext context,
             CancellationToken cancellationToken = default);
     }
 }

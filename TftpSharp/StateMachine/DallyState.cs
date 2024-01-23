@@ -18,7 +18,7 @@ namespace TftpSharp.StateMachine
             _blockNumber = blockNumber;
         }
 
-        public override async Task<IState<TftpContext>> HandleStateAsync(TftpContext context, CancellationToken cancellationToken = default)
+        protected override async Task<IState<TftpContext>> HandleStateAsync(TftpContext context, CancellationToken cancellationToken = default)
         {
             
             await context.Client.SendTftpPacketAsync(new AckPacket(_blockNumber), new IPEndPoint(context.Host, context.TransferId), cancellationToken: cancellationToken);
@@ -46,7 +46,7 @@ namespace TftpSharp.StateMachine
             return new DallyState(_blockNumber);
         }
 
-        public override Task<IState<TftpContext>> HandleTimeoutAsync(TftpContext context, CancellationToken cancellationToken = default) 
+        protected override Task<IState<TftpContext>> HandleTimeoutAsync(TftpContext context, CancellationToken cancellationToken = default) 
             => Task.FromResult<IState<TftpContext>>(new EndState<TftpContext>());
     }
 }

@@ -10,7 +10,7 @@ namespace TftpSharp.StateMachine
 {
     internal abstract class InitialReceiveState : TimeoutState
     {
-        public sealed override async Task<IState<TftpContext>> HandleStateAsync(TftpContext context, CancellationToken cancellationToken = default)
+        protected sealed override async Task<IState<TftpContext>> HandleStateAsync(TftpContext context, CancellationToken cancellationToken = default)
         {
             IState<TftpContext>? state = null;
             bool retry;
