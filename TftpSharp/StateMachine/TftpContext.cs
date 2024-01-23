@@ -25,4 +25,5 @@ internal class TftpContext
     public IPAddress Host { get; }
     public int Timeout { get; set; } = 3000;
     public int MaxTimeoutAttempts { get; set; } = 5;
+    public byte[]? LastReadBlock { get; set; }
 }
