@@ -9,7 +9,7 @@ namespace TftpSharp.StateMachine
         {
             var currentState = initialState;
 
-            while (currentState is not EndState<TftpContext>)
+            while (currentState is not EndState<TContext>)
                 currentState = await currentState.HandleAsync(context, cancellationToken);
         }
     }

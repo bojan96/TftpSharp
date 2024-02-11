@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TftpSharp.Exceptions;
 using TftpSharp.Extensions;
 using TftpSharp.Packet;
+using TftpSharp.StateMachine;
 
 namespace TftpSharp.Client
 {
@@ -31,87 +32,9 @@ namespace TftpSharp.Client
         {
             var sessionHostIp = await ResolveHostAsync(_host, cancellationToken);
 
-            var (initialPacket, initialRemoteEndpoint) = await SendAndReceiveWithRetry(new WriteRequestPacket(_filename, _transferMode), new IPEndPoint(sessionHostIp, 69), async token =>
-            {
-                bool retry;
-                Packet.Packet? packet = null;
-                var result = new UdpReceiveResult();
-
-                do
-                {
-                    try
-                    {
-                        result = await _udpClient.ReceiveFromAddressAsync(sessionHostIp, token);
-                        packet = PacketParser.Parse(result.Buffer);
-
-                        if (packet is not ErrorPacket && packet is not AckPacket)
-                            retry = true;
-                        else if(packet is AckPacket ackPacket && ackPacket.BlockNumber != 0)
-                            retry = true;
-                        else
-                            retry = false;
-                    }
-                    catch (TftpInvalidPacketException)
-                    {
-                        retry = true;
-                    }
-                } while (retry);
-
-
-                return (packet!, result.RemoteEndPoint);
-            }, _timeout, 5, cancellationToken);
-
-            if (initialPacket is ErrorPacket errPacket)
-                throw new TftpErrorResponseException(errPacket.Code, errPacket.ErrorMessage);
-
-            //var ackPacket = (AckPacket)initialPacket;
-            var transferId = initialRemoteEndpoint.Port;
-            var remoteEndpoint = new IPEndPoint(sessionHostIp, transferId);
-
-            ushort blockNumber = 1;
-            int bytesRead;
-            var block = new byte[512];
-
-            do
-            {
-                bytesRead = await _stream.ReadAsync(block, cancellationToken);
-                var (recvPacket, _) = await SendAndReceiveWithRetry(new DataPacket(blockNumber, block[..bytesRead]), remoteEndpoint,
-                    async token =>
-                    {
-                        bool retry;
-                        Packet.Packet? packet = null;
-                        var result = new UdpReceiveResult();
-
-                        do
-                        {
-                            try
-                            {
-                                result = await _udpClient.ReceiveFromAsync(remoteEndpoint, token);
-                                packet = PacketParser.Parse(result.Buffer);
-
-                                if (packet is not ErrorPacket && packet is not AckPacket)
-                                    retry = true;
-                                else if (packet is AckPacket ackPacket &&
-                                         ackPacket.BlockNumber != blockNumber)
-                                    retry = true;
-                                else
-                                    retry = false;
-                            }
-                            catch (TftpInvalidPacketException)
-                            {
-                                retry = true;
-                            }
-                        } while (retry);
-
-                        return (packet!, result.RemoteEndPoint);
-                    }, _timeout, 5, cancellationToken);
-
-                if (recvPacket is ErrorPacket errorPacket)
-                    throw new TftpErrorResponseException(errorPacket.Code, errorPacket.ErrorMessage);
-
-                ++blockNumber;
-
-            } while (bytesRead == block.LongLength);
+            var stateMachineRunner = new StateMachineRunner();
+            await stateMachineRunner.RunAsync(new SendWrqState(1),
+                new TftpContext(_udpClient, _stream, _filename, _transferMode, 69, sessionHostIp), cancellationToken);
 
         }
 
