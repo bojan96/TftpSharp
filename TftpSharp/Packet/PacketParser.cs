@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TftpSharp.Exceptions;
@@ -36,6 +37,22 @@ namespace TftpSharp.Packet
 
                     return new ErrorPacket((ErrorCode)Packet.BytesToUshort(packetBytes[2..4]),
                         Encoding.UTF8.GetString(packetBytes[4..(result.Index + 4)]));
+
+                case Packet.PacketType.OACK:
+                    IEnumerable<byte> bytes = packetBytes.Skip(2);
+                    var options = new Dictionary<string, string>()
+
+                    while (bytes.Any())
+                    {
+                        var optionNameBytes = bytes.TakeWhile(b => b != 0).ToArray();
+                        bytes = bytes.Skip(optionNameBytes.Length);
+                        var optionValueBytes = bytes.TakeWhile(b => b != 0).ToArray();
+                        bytes = bytes.Skip(optionValueBytes.Length);
+                        
+                        options.Add(Encoding.UTF8.GetString(optionNameBytes), Encoding.UTF8.GetString(optionValueBytes));
+                    }
+
+                    return new OackPacket(options);
                 default:
                     throw new TftpInvalidPacketException("Invalid packet");
             }

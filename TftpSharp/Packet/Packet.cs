@@ -5,7 +5,7 @@ namespace TftpSharp.Packet
 {
     internal abstract class Packet
     {
-        public enum PacketType : byte { RRQ = 1, WRQ, DATA, ACK, ERROR }
+        public enum PacketType : byte { RRQ = 1, WRQ, DATA, ACK, ERROR, OACK }
 
         public PacketType Type { get; }
 

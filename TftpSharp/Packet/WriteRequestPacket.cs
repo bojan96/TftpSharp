@@ -1,9 +1,11 @@
-﻿namespace TftpSharp.Packet
+﻿using System.Collections.Generic;
+
+namespace TftpSharp.Packet
 {
     internal class WriteRequestPacket : RequestPacket
     {
-        public WriteRequestPacket(string filename, TransferMode transferMode)
-            : base(PacketType.WRQ, filename, transferMode)
+        public WriteRequestPacket(string filename, TransferMode transferMode, IReadOnlyDictionary<string, string> options)
+            : base(PacketType.WRQ, filename, transferMode, options)
         {
         }
     }
