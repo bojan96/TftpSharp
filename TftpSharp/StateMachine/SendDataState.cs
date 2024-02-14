@@ -21,8 +21,7 @@ internal class SendDataState : IState<TftpContext>
     {
         if (context.LastReadBlock is null)
         {
-            // TODO: Remove hardcoded block size
-            var block = new byte[512];
+            var block = new byte[context.BlockSize];
             var bytesRead = await context.Stream.ReadAsync(block, cancellationToken);
             context.LastReadBlock = block[..bytesRead];
         }

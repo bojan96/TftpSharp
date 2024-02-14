@@ -27,11 +27,14 @@ internal class DownloadReceiveState : ReceiveState
                 // TODO: Handle invalid block number
                 await context.Stream.WriteAsync(dataPacket.Data, cancellationToken);
 
-                // TODO: Remove hardcoded block size
-                if (dataPacket.Data.Length == 512)
+                if (dataPacket.Data.Length == context.BlockSize)
                     return new SendAckState(dataPacket.BlockNumber, 1);
 
                 return new DallyState(dataPacket.BlockNumber);
+
+            //case OackPacket oackPacket:
+            //    break;
+
             default:
                 return null;
         }

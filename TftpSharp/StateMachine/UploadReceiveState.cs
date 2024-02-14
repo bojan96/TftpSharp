@@ -26,7 +26,7 @@ namespace TftpSharp.StateMachine
                     var lastReadBlock = context.LastReadBlock!;
                     context.LastReadBlock = null;
 
-                    if (lastReadBlock.Length < 512)
+                    if (lastReadBlock.Length < context.BlockSize)
                         return Task.FromResult<IState<TftpContext>?>(new EndState<TftpContext>());
 
                     // Discard the last read block
