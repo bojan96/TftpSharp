@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,5 +36,18 @@ namespace TftpSharp.StateMachine
         }
 
         protected abstract Task<IState<TftpContext>?> HandleReceiveStateAsync(Packet.Packet packet, TftpContext context, CancellationToken cancellationToken);
+
+
+        protected static void HandleOackPacketOptions(IReadOnlyDictionary<string, string> options, TftpContext context)
+        {
+            const string BlockSizeOption = "blksize";
+
+            if (options.ContainsKey(BlockSizeOption))
+            {
+                var blkSizeStr = options[BlockSizeOption];
+                var blkSize = int.Parse(blkSizeStr);
+                context.BlockSize = blkSize;
+            }
+        }
     }
 }

@@ -29,9 +29,4 @@ internal class TftpContext
     public byte[]? LastReadBlock { get; set; }
     public Dictionary<string, string> Options { get; } = new();
     public int BlockSize { get; set; } = 512;
-
-    public void HandleReceivedOptions(IReadOnlyDictionary<string, string> options)
-    {
-
-    }
 }

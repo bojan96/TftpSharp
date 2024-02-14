@@ -17,24 +17,30 @@ internal class DownloadSession : Session
     private readonly TransferMode _transferMode;
     private readonly Stream _stream;
     private readonly int _timeout;
+    private readonly int? _blockSize;
 
-    public DownloadSession(UdpClient udpClient, string host, string filename, TransferMode transferMode, Stream stream, int timeout) : base(udpClient)
+    public DownloadSession(UdpClient udpClient, string host, string filename, TransferMode transferMode, Stream stream, int timeout, int? blockSize) : base(udpClient)
     {
         _host = host;
         _filename = filename;
         _transferMode = transferMode;
         _stream = stream;
         _timeout = timeout;
+        _blockSize = blockSize;
     }
 
     public async Task Start(CancellationToken cancellationToken = default)
     {
         var sessionHostIp = await ResolveHostAsync(_host, cancellationToken);
+        var context = new TftpContext(_udpClient, _stream, _filename, _transferMode, 69, sessionHostIp)
+        {
+            Timeout = _timeout,
+        };
+        if (_blockSize is not null)
+            context.Options.Add("blksize", _blockSize.ToString()!);
+
         var stateMachineRunner = new StateMachineRunner();
-        await stateMachineRunner.RunAsync(new SendRrqState(1),
-            new TftpContext(_udpClient, _stream, _filename, _transferMode, 69, sessionHostIp)
-            {
-                Timeout = _timeout
-            }, cancellationToken);
+        await stateMachineRunner.RunAsync(new SendRrqState(1), context,
+             cancellationToken);
     }
 }

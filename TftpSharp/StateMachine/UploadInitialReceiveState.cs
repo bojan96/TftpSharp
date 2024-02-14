@@ -26,7 +26,7 @@ namespace TftpSharp.StateMachine
 
         private Task<IState<TftpContext>?> HandleOackPacket(OackPacket oackPacket, TftpContext context)
         {
-            context.HandleReceivedOptions(oackPacket.Options);
+            HandleOackPacketOptions(oackPacket.Options, context);
             return Task.FromResult<IState<TftpContext>?>(new SendDataState(1, 1));
         }
 
