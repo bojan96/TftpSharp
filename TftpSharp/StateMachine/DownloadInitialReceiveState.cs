@@ -28,6 +28,9 @@ internal class DownloadInitialReceiveState : InitialReceiveState
                     return new SendAckState(dataPacket.BlockNumber, 1);
 
                 return new DallyState(dataPacket.BlockNumber);
+            case OackPacket oackPacket:
+                context.HandleReceivedOptions(oackPacket.Options);
+                return new SendAckState(0, 1);
             default:
                 return null;
         }

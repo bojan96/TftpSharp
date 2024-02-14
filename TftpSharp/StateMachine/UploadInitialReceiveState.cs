@@ -19,8 +19,15 @@ namespace TftpSharp.StateMachine
             {
                 ErrorPacket errPacket => Task.FromResult<IState<TftpContext>?>(new ErrorPacketReceivedState(errPacket)),
                 AckPacket { BlockNumber: 0 } => Task.FromResult<IState<TftpContext>?>(new SendDataState(1, 1)),
+                OackPacket oackPacket => HandleOackPacket(oackPacket, context),
                 _ => Task.FromResult<IState<TftpContext>?>(null)
             };
+        }
+
+        private Task<IState<TftpContext>?> HandleOackPacket(OackPacket oackPacket, TftpContext context)
+        {
+            context.HandleReceivedOptions(oackPacket.Options);
+            return Task.FromResult<IState<TftpContext>?>(new SendDataState(1, 1));
         }
 
         protected override Task<IState<TftpContext>> HandleTimeoutAsync(TftpContext context,

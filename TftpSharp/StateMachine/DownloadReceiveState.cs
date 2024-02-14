@@ -31,10 +31,6 @@ internal class DownloadReceiveState : ReceiveState
                     return new SendAckState(dataPacket.BlockNumber, 1);
 
                 return new DallyState(dataPacket.BlockNumber);
-
-            //case OackPacket oackPacket:
-            //    break;
-
             default:
                 return null;
         }
