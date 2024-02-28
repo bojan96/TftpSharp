@@ -23,8 +23,7 @@ internal class DownloadReceiveState : ReceiveState
         {
             case ErrorPacket errPacket:
                 return new ErrorPacketReceivedState(errPacket);
-            case DataPacket dataPacket:
-                // TODO: Handle invalid block number
+            case DataPacket dataPacket when dataPacket.BlockNumber == _lastRcvBlockNumber + 1:
                 await context.Stream.WriteAsync(dataPacket.Data, cancellationToken);
 
                 if (dataPacket.Data.Length == context.BlockSize)

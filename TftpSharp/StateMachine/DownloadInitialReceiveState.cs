@@ -20,8 +20,7 @@ internal class DownloadInitialReceiveState : InitialReceiveState
         {
             case ErrorPacket errPacket:
                 return new ErrorPacketReceivedState(errPacket);
-            case DataPacket dataPacket:
-                // TODO: Handle invalid block number
+            case DataPacket { BlockNumber: 1 } dataPacket:
                 await context.Stream.WriteAsync(dataPacket.Data, cancellationToken);
                 
                 if (dataPacket.Data.Length == context.BlockSize)
