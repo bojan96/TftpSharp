@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using TftpSharp.Exceptions;
@@ -19,7 +18,7 @@ internal class UploadSession : Session
     private readonly int _timeout;
     private readonly int? _blockSize;
 
-    public UploadSession(UdpClient udpClient, string host, string filename, TransferMode transferMode, Stream stream, int timeout, int? blockSize) : base(udpClient)
+    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, int timeout, int? blockSize)
     {
         _host = host;
         _filename = filename;

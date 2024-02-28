@@ -11,12 +11,10 @@ using TftpSharp.Client;
 
 namespace TftpSharp
 {
-    public class TftpClient : IDisposable
+    public class TftpClient
     {
         private const int MinBlockSize = 8;
         private const int MaxBlockSize = 65464;
-
-        private readonly UdpClient _udpClient = new();
         private int? _blockSize;
         
         public string Host { get; }
@@ -42,17 +40,19 @@ namespace TftpSharp
 
         public async Task DownloadStreamAsync(string remoteFilename, Stream stream,
             CancellationToken cancellationToken = default)
-            => await new DownloadSession(_udpClient, Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize).Start(
+        {
+            using var session =
+                new DownloadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize);
+            await session.Start(
                 cancellationToken);
+        }
 
         public async Task UploadStreamAsync(string remoteFilename, Stream stream,
             CancellationToken cancellationToken = default)
-            => await new UploadSession(_udpClient, Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize).Start(
-                cancellationToken);
-
-        public void Dispose()
         {
-            _udpClient.Dispose();
+            using var session =
+                new UploadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize);
+            await session.Start(cancellationToken);
         }
     }
 }

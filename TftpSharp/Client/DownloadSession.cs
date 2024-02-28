@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using TftpSharp.StateMachine;
@@ -19,7 +18,7 @@ internal class DownloadSession : Session
     private readonly int _timeout;
     private readonly int? _blockSize;
 
-    public DownloadSession(UdpClient udpClient, string host, string filename, TransferMode transferMode, Stream stream, int timeout, int? blockSize) : base(udpClient)
+    public DownloadSession(string host, string filename, TransferMode transferMode, Stream stream, int timeout, int? blockSize)
     {
         _host = host;
         _filename = filename;

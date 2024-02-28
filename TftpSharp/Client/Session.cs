@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 using System.Net;
 using System.Threading.Tasks;
 using System.Threading;
@@ -7,15 +8,10 @@ using TftpSharp.Exceptions;
 
 namespace TftpSharp.Client;
 
-internal abstract class Session
+internal abstract class Session : IDisposable
 {
 
-    protected readonly UdpClient _udpClient;
-
-    protected Session(UdpClient udpClient)
-    {
-        _udpClient = udpClient;
-    }
+    protected readonly UdpClient _udpClient = new();
 
     protected static async Task<IPAddress> ResolveHostAsync(string host, CancellationToken cancellationToken = default)
     {
@@ -26,5 +22,10 @@ internal abstract class Session
         var sessionHostIp = ipAddresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork)!;
 
         return sessionHostIp;
+    }
+
+    public void Dispose()
+    {
+        _udpClient.Dispose();
     }
 }
