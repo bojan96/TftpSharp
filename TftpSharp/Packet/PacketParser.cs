@@ -40,16 +40,18 @@ namespace TftpSharp.Packet
 
                 case Packet.PacketType.OACK:
                     IEnumerable<byte> bytes = packetBytes.Skip(2);
-                    var options = new Dictionary<string, string>()
+                    var options = new Dictionary<string, string>();
 
                     while (bytes.Any())
                     {
                         var optionNameBytes = bytes.TakeWhile(b => b != 0).ToArray();
-                        bytes = bytes.Skip(optionNameBytes.Length);
+                        bytes = bytes.Skip(optionNameBytes.Length + 1);
                         var optionValueBytes = bytes.TakeWhile(b => b != 0).ToArray();
-                        bytes = bytes.Skip(optionValueBytes.Length);
-                        
-                        options.Add(Encoding.UTF8.GetString(optionNameBytes), Encoding.UTF8.GetString(optionValueBytes));
+                        bytes = bytes.Skip(optionValueBytes.Length + 1);
+
+                        var optionName = Encoding.UTF8.GetString(optionNameBytes);
+                        var optionValue = Encoding.UTF8.GetString(optionValueBytes);
+                        options.Add(optionName, optionValue);
                     }
 
                     return new OackPacket(options);
