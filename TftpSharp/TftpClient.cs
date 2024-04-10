@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TftpSharp.Client;
+using TftpSharp.TransferChannel;
 
 namespace TftpSharp
 {
@@ -41,8 +42,9 @@ namespace TftpSharp
         public async Task DownloadStreamAsync(string remoteFilename, Stream stream,
             CancellationToken cancellationToken = default)
         {
-            using var session =
-                new DownloadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize);
+            using var transferChannel = new UdpTransferChannel();
+            var session =
+                new DownloadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize, transferChannel);
             await session.Start(
                 cancellationToken);
         }
@@ -50,9 +52,11 @@ namespace TftpSharp
         public async Task UploadStreamAsync(string remoteFilename, Stream stream,
             CancellationToken cancellationToken = default)
         {
-            using var session =
-                new UploadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize);
+            using var transferChannel = new UdpTransferChannel();
+            var session =
+                new UploadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize, transferChannel);
             await session.Start(cancellationToken);
         }
+        
     }
 }

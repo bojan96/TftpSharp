@@ -19,7 +19,7 @@ internal class SendAckState : IState<TftpContext>
 
     public async Task<IState<TftpContext>> HandleAsync(TftpContext context, CancellationToken cancellationToken = default)
     {
-        await context.Client.SendTftpPacketAsync(new AckPacket(_blockNumber),
+        await context.Channel.SendTftpPacketAsync(new AckPacket(_blockNumber),
             new IPEndPoint(context.Host, context.TransferId), cancellationToken);
 
         return new DownloadReceiveState(_blockNumber, _attemptCount);

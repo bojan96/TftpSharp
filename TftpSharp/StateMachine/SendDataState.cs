@@ -26,7 +26,7 @@ internal class SendDataState : IState<TftpContext>
             context.LastReadBlock = block[..bytesRead];
         }
 
-        await context.Client.SendTftpPacketAsync(new DataPacket(_blockNumber, context.LastReadBlock),
+        await context.Channel.SendTftpPacketAsync(new DataPacket(_blockNumber, context.LastReadBlock),
             new IPEndPoint(context.Host, context.TransferId), cancellationToken);
 
         return new UploadReceiveState(_attemptCount, _blockNumber);

@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using TftpSharp.TransferChannel;
 
 namespace TftpSharp.StateMachine;
 
 internal class TftpContext
 {
-    public TftpContext(UdpClient client, Stream stream, string remoteFilename, TransferMode transferMode, int port, IPAddress host)
+    public TftpContext(ITransferChannel channel, Stream stream, string remoteFilename, TransferMode transferMode, int port, IPAddress host)
     {
-        Client = client;
+        Channel = channel;
         Stream = stream;
         RemoteFilename = remoteFilename;
         TransferMode = transferMode;
@@ -18,7 +19,7 @@ internal class TftpContext
         Host = host;
     }
 
-    public UdpClient Client { get; }
+    public ITransferChannel Channel { get; }
     public Stream Stream { get; }
     public string RemoteFilename { get; }
     public TransferMode TransferMode { get; }

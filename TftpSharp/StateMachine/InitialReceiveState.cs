@@ -20,7 +20,7 @@ namespace TftpSharp.StateMachine
             {
                 try
                 {
-                    var result = await context.Client.ReceiveFromAddressAsync(context.Host, cancellationToken);
+                    var result = await context.Channel.ReceiveFromAddressAsync(context.Host, cancellationToken);
                     context.TransferId = result.RemoteEndPoint.Port;
                     var packet = PacketParser.Parse(result.Buffer);
                     state = await HandleReceiveStateAsync(packet, context, cancellationToken);

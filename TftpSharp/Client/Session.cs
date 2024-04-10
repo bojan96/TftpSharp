@@ -8,11 +8,8 @@ using TftpSharp.Exceptions;
 
 namespace TftpSharp.Client;
 
-internal abstract class Session : IDisposable
+internal abstract class Session
 {
-
-    protected readonly UdpClient _udpClient = new();
-
     protected static async Task<IPAddress> ResolveHostAsync(string host, CancellationToken cancellationToken = default)
     {
         var ipAddresses = await Dns.GetHostAddressesAsync(host, cancellationToken);
@@ -22,10 +19,5 @@ internal abstract class Session : IDisposable
         var sessionHostIp = ipAddresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork)!;
 
         return sessionHostIp;
-    }
-
-    public void Dispose()
-    {
-        _udpClient.Dispose();
     }
 }

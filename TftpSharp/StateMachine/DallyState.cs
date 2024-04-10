@@ -21,14 +21,14 @@ namespace TftpSharp.StateMachine
         protected override async Task<IState<TftpContext>> HandleStateAsync(TftpContext context, CancellationToken cancellationToken = default)
         {
             
-            await context.Client.SendTftpPacketAsync(new AckPacket(_blockNumber), new IPEndPoint(context.Host, context.TransferId), cancellationToken: cancellationToken);
+            await context.Channel.SendTftpPacketAsync(new AckPacket(_blockNumber), new IPEndPoint(context.Host, context.TransferId), cancellationToken: cancellationToken);
 
             bool retry;
             do
             {
                 try
                 {
-                    var receiveResult = await context.Client.ReceiveFromAddressAsync(context.Host, cancellationToken);
+                    var receiveResult = await context.Channel.ReceiveFromAddressAsync(context.Host, cancellationToken);
                     var packet = PacketParser.Parse(receiveResult.Buffer);
 
                     if (packet is DataPacket dataPacket && dataPacket.BlockNumber == _blockNumber)

@@ -18,7 +18,7 @@ namespace TftpSharp.StateMachine
         public async Task<IState<TftpContext>> HandleAsync(TftpContext context,
             CancellationToken cancellationToken = default)
         {
-            await context.Client.SendTftpPacketAsync(new ReadRequestPacket(context.RemoteFilename, context.TransferMode, context.Options), new IPEndPoint(context.Host, context.Port), cancellationToken);
+            await context.Channel.SendTftpPacketAsync(new ReadRequestPacket(context.RemoteFilename, context.TransferMode, context.Options), new IPEndPoint(context.Host, context.Port), cancellationToken);
             return new DownloadInitialReceiveState(_attemptCount);
         }
     }

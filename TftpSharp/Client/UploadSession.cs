@@ -7,6 +7,7 @@ using TftpSharp.Exceptions;
 using TftpSharp.Extensions;
 using TftpSharp.Packet;
 using TftpSharp.StateMachine;
+using TftpSharp.TransferChannel;
 
 namespace TftpSharp.Client;
 
@@ -18,8 +19,9 @@ internal class UploadSession : Session
     private readonly Stream _stream;
     private readonly TimeSpan _timeout;
     private readonly int? _blockSize;
+    public readonly ITransferChannel _transferChannel;
 
-    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout, int? blockSize)
+    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout, int? blockSize, ITransferChannel transferChannel)
     {
         _host = host;
         _filename = filename;
@@ -27,13 +29,14 @@ internal class UploadSession : Session
         _stream = stream;
         _timeout = timeout;
         _blockSize = blockSize;
+        _transferChannel = transferChannel;
     }
 
 
     public async Task Start(CancellationToken cancellationToken = default)
     {
         var sessionHostIp = await ResolveHostAsync(_host, cancellationToken);
-        var context = new TftpContext(_udpClient, _stream, _filename, _transferMode, 69, sessionHostIp)
+        var context = new TftpContext(_transferChannel, _stream, _filename, _transferMode, 69, sessionHostIp)
         {
             Timeout = _timeout
         };
