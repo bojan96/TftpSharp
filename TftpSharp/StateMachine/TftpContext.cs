@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -24,7 +25,7 @@ internal class TftpContext
     public int Port { get; }
     public int TransferId { get; set; }
     public IPAddress Host { get; }
-    public int Timeout { get; set; } = 3000;
+    public TimeSpan Timeout { get; set; }
     public int MaxTimeoutAttempts { get; set; } = 5;
     public byte[]? LastReadBlock { get; set; }
     public Dictionary<string, string> Options { get; } = new();

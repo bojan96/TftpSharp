@@ -18,7 +18,7 @@ namespace TftpSharp
         private int? _blockSize;
         
         public string Host { get; }
-        public int Timeout { get; set; } = 3000;
+        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(3);
 
         public int? BlockSize
         {

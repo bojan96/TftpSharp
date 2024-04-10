@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,10 +16,10 @@ internal class UploadSession : Session
     private readonly string _filename;
     private readonly TransferMode _transferMode;
     private readonly Stream _stream;
-    private readonly int _timeout;
+    private readonly TimeSpan _timeout;
     private readonly int? _blockSize;
 
-    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, int timeout, int? blockSize)
+    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout, int? blockSize)
     {
         _host = host;
         _filename = filename;

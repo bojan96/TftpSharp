@@ -15,10 +15,10 @@ internal class DownloadSession : Session
     private readonly string _filename;
     private readonly TransferMode _transferMode;
     private readonly Stream _stream;
-    private readonly int _timeout;
+    private readonly TimeSpan _timeout;
     private readonly int? _blockSize;
 
-    public DownloadSession(string host, string filename, TransferMode transferMode, Stream stream, int timeout, int? blockSize)
+    public DownloadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout, int? blockSize)
     {
         _host = host;
         _filename = filename;
