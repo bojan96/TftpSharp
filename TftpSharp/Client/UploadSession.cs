@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using TftpSharp.Dns;
 using TftpSharp.Exceptions;
 using TftpSharp.Extensions;
 using TftpSharp.Packet;
@@ -11,7 +12,7 @@ using TftpSharp.TransferChannel;
 
 namespace TftpSharp.Client;
 
-internal class UploadSession : Session
+internal class UploadSession
 {
     private readonly string _host;
     private readonly string _filename;
@@ -20,8 +21,9 @@ internal class UploadSession : Session
     private readonly TimeSpan _timeout;
     private readonly int? _blockSize;
     public readonly ITransferChannel _transferChannel;
+    private readonly IHostResolver _hostResolver;
 
-    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout, int? blockSize, ITransferChannel transferChannel)
+    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout, int? blockSize, ITransferChannel transferChannel, IHostResolver hostResolver)
     {
         _host = host;
         _filename = filename;
@@ -30,12 +32,13 @@ internal class UploadSession : Session
         _timeout = timeout;
         _blockSize = blockSize;
         _transferChannel = transferChannel;
+        _hostResolver = hostResolver;
     }
 
 
     public async Task Start(CancellationToken cancellationToken = default)
     {
-        var sessionHostIp = await ResolveHostAsync(_host, cancellationToken);
+        var sessionHostIp = await _hostResolver.ResolveHostToIpv4AddressAsync(_host, cancellationToken);
         var context = new TftpContext(_transferChannel, _stream, _filename, _transferMode, 69, sessionHostIp)
         {
             Timeout = _timeout
