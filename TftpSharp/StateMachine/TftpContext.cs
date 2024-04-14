@@ -27,7 +27,7 @@ internal class TftpContext
     public int TransferId { get; set; }
     public IPAddress Host { get; }
     public TimeSpan Timeout { get; set; }
-    public int MaxTimeoutAttempts { get; set; } = 5;
+    public int MaxTimeoutAttempts { get; set; }
     public byte[]? LastReadBlock { get; set; }
     public Dictionary<string, string> Options { get; } = new();
     public int BlockSize { get; set; } = 512;

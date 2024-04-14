@@ -19,10 +19,11 @@ internal class DownloadSession
     private readonly Stream _stream;
     private readonly TimeSpan _timeout;
     private readonly int? _blockSize;
+    private readonly int _maxTimeoutAttempts;
     private readonly ITransferChannel _transferChannel;
     private readonly IHostResolver _hostResolver;
 
-    public DownloadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout, int? blockSize, ITransferChannel transferChannel, IHostResolver hostResolver)
+    public DownloadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout, int? blockSize, int maxTimeoutAttempts, ITransferChannel transferChannel, IHostResolver hostResolver)
     {
         _host = host;
         _filename = filename;
@@ -30,6 +31,7 @@ internal class DownloadSession
         _stream = stream;
         _timeout = timeout;
         _blockSize = blockSize;
+        _maxTimeoutAttempts = maxTimeoutAttempts;
         _transferChannel = transferChannel;
         _hostResolver = hostResolver;
     }
@@ -40,6 +42,7 @@ internal class DownloadSession
         var context = new TftpContext(_transferChannel, _stream, _filename, _transferMode, 69, sessionHostIp)
         {
             Timeout = _timeout,
+            MaxTimeoutAttempts = _maxTimeoutAttempts,
         };
         if (_blockSize is not null)
             context.Options.Add("blksize", _blockSize.ToString()!);

@@ -18,9 +18,16 @@ namespace TftpSharp
         private const int MinBlockSize = 8;
         private const int MaxBlockSize = 65464;
         private int? _blockSize;
-        
+        private int _maxTimeoutAttempts = 5;
+
         public string Host { get; }
         public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(3);
+
+        public int MaxTimeoutAttempts
+        {
+            get => _maxTimeoutAttempts;
+            set => _maxTimeoutAttempts = value < 1 ? throw new ArgumentException("Must be greater than or equal to 1", nameof(MaxTimeoutAttempts)) : value;
+        }
 
         public int? BlockSize
         {
@@ -46,7 +53,7 @@ namespace TftpSharp
             var hostResolver = new DnsHostResolver();
             using var transferChannel = new UdpTransferChannel();
             var session =
-                new DownloadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize, transferChannel, hostResolver);
+                new DownloadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize, _maxTimeoutAttempts, transferChannel, hostResolver);
             await session.Start(
                 cancellationToken);
         }
@@ -57,7 +64,7 @@ namespace TftpSharp
             var hostResolver = new DnsHostResolver();
             using var transferChannel = new UdpTransferChannel();
             var session =
-                new UploadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize, transferChannel, hostResolver);
+                new UploadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize, _maxTimeoutAttempts, transferChannel, hostResolver);
             await session.Start(cancellationToken);
         }
         
