@@ -22,6 +22,7 @@ namespace TftpSharp
 
         public string Host { get; }
         public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(3);
+        public TransferMode TransferMode { get; set; } = TransferMode.Octet;
 
         public int MaxTimeoutAttempts
         {
@@ -53,7 +54,7 @@ namespace TftpSharp
             var hostResolver = new DnsHostResolver();
             using var transferChannel = new UdpTransferChannel();
             var session =
-                new DownloadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize, _maxTimeoutAttempts, transferChannel, hostResolver);
+                new DownloadSession(Host, remoteFilename, TransferMode, stream, Timeout, _blockSize, _maxTimeoutAttempts, transferChannel, hostResolver);
             await session.Start(
                 cancellationToken);
         }
@@ -64,7 +65,7 @@ namespace TftpSharp
             var hostResolver = new DnsHostResolver();
             using var transferChannel = new UdpTransferChannel();
             var session =
-                new UploadSession(Host, remoteFilename, TransferMode.Octet, stream, Timeout, _blockSize, _maxTimeoutAttempts, transferChannel, hostResolver);
+                new UploadSession(Host, remoteFilename, TransferMode, stream, Timeout, _blockSize, _maxTimeoutAttempts, transferChannel, hostResolver);
             await session.Start(cancellationToken);
         }
         
