@@ -351,11 +351,18 @@ public class DownloadSessionTests
         var downloadSession = new DownloadSession(
             host: host,
             filename: filename,
-            transferMode: transferMode, memoryStream, TimeSpan.FromSeconds(1), blockSize, maxTimeoutAttempts: maxTimeoutAttempts, transferMock.Object, resolver);
+            transferMode: transferMode,
+            stream: memoryStream,
+            timeout: TimeSpan.FromSeconds(1),
+            blockSize: blockSize,
+            maxTimeoutAttempts: maxTimeoutAttempts,
+            transferChannel: transferMock.Object,
+            hostResolver: resolver);
 
         await downloadSession.Start();
 
         Assert.Equal(payload, memoryStream.ToArray());
+
     }
 
     private IHostResolver GetMockResolver(string host, IPAddress address)
