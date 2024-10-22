@@ -67,7 +67,7 @@ public class DownloadSessionTests
 
 
     [Fact]
-    public async Task DownloadTimeout()
+    public async Task DownloadTimeoutInitialReceiveState()
     {
         const int maxTimeoutAttempts = 1;
         const string filename = "test";
@@ -122,7 +122,7 @@ public class DownloadSessionTests
         const int port = 69;
         const int tid = 0;
         var address = IPAddress.Loopback;
-        var payload = Enumerable.Repeat((byte)1, 512).ToArray();
+        var payload = Enumerable.Repeat((byte)1, 1025).ToArray();
         var resolver = GetMockResolver(host, address);
         var transferMock = new Mock<ITransferChannel>(MockBehavior.Strict);
 
@@ -136,7 +136,7 @@ public class DownloadSessionTests
             .Returns(Task.CompletedTask);
 
         transferMock.InSequence(mockSequence).Setup(ch => ch.ReceiveFromAddressAsync(address, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ITransferChannel.ChannelPacket(new DataPacket(1, payload).Serialize(),
+            .ReturnsAsync(new ITransferChannel.ChannelPacket(new DataPacket(1, payload[..512]).Serialize(),
                 new IPEndPoint(address, tid)));
 
         transferMock.InSequence(mockSequence).Setup(ch => ch.SendTftpPacketAsync(
@@ -146,7 +146,7 @@ public class DownloadSessionTests
             .Returns(Task.CompletedTask);
 
         transferMock.InSequence(mockSequence).Setup(ch => ch.ReceiveFromAddressAsync(address, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ITransferChannel.ChannelPacket(new DataPacket(2, Array.Empty<byte>()).Serialize(),
+            .ReturnsAsync(new ITransferChannel.ChannelPacket(new DataPacket(2, payload[512..1024]).Serialize(),
                 new IPEndPoint(address, port)));
 
         transferMock.InSequence(mockSequence).Setup(ch => ch.SendTftpPacketAsync(It.Is<Packet.Packet>(p =>
@@ -154,7 +154,15 @@ public class DownloadSessionTests
             ((AckPacket)p).BlockNumber == 2), new IPEndPoint(address, tid), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         transferMock.InSequence(mockSequence).Setup(ch => ch.ReceiveFromAddressAsync(address, It.IsAny<CancellationToken>()))
-            .Returns(() => Task.Delay(5000).ContinueWith(t =>
+            .ReturnsAsync(new ITransferChannel.ChannelPacket(new DataPacket(3, payload[1024..]).Serialize(),
+                new IPEndPoint(address, port)));
+
+        transferMock.InSequence(mockSequence).Setup(ch => ch.SendTftpPacketAsync(It.Is<Packet.Packet>(p =>
+            p.Type == Packet.Packet.PacketType.ACK &&
+            ((AckPacket)p).BlockNumber == 3), new IPEndPoint(address, tid), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        transferMock.InSequence(mockSequence).Setup(ch => ch.ReceiveFromAddressAsync(address, It.IsAny<CancellationToken>()))
+            .Returns(() => Task.Delay(2000).ContinueWith(t =>
                 new ITransferChannel.ChannelPacket(Array.Empty<byte>(), new IPEndPoint(address, tid))));
 
 
