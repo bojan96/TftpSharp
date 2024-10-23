@@ -43,7 +43,8 @@ internal class UploadSession
         var sessionHostIp = await _hostResolver.ResolveHostToIpv4AddressAsync(_host, cancellationToken);
         var context = new TftpContext(_transferChannel, _stream, _filename, _transferMode, 69, sessionHostIp)
         {
-            Timeout = _timeout
+            Timeout = _timeout,
+            MaxTimeoutAttempts = _maxTimeoutAttempts
         };
         if(_blockSize is not null)
             context.Options.Add("blksize", _blockSize.ToString()!);
