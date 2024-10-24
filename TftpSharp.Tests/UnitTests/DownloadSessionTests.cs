@@ -7,11 +7,11 @@ using TftpSharp.Exceptions;
 using TftpSharp.Packet;
 using TftpSharp.TransferChannel;
 
-namespace TftpSharp.Tests;
+namespace TftpSharp.Tests.UnitTests;
 
 public class DownloadSessionTests
 {
-    
+
     [Fact]
     public async Task DownloadLessThanDefaultBlockSize()
     {
@@ -31,7 +31,7 @@ public class DownloadSessionTests
         transferMock
             .InSequence(mockSequence)
             .Setup(ch => ch.SendTftpPacketAsync(
-                It.Is<Packet.Packet>(p => p.Type == Packet.Packet.PacketType.RRQ && 
+                It.Is<Packet.Packet>(p => p.Type == Packet.Packet.PacketType.RRQ &&
                                           ((ReadRequestPacket)p).Filename == filename && ((ReadRequestPacket)p).TransferMode == transferMode),
                 new IPEndPoint(address, port),
                 It.IsAny<CancellationToken>()))
@@ -56,8 +56,8 @@ public class DownloadSessionTests
 
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
-            host: host, 
-            filename: filename, 
+            host: host,
+            filename: filename,
             transferMode: transferMode, memoryStream, TimeSpan.FromSeconds(1), null, maxTimeoutAttempts: maxTimeoutAttempts, transferMock.Object, resolver);
 
         await downloadSession.Start();
@@ -100,10 +100,10 @@ public class DownloadSessionTests
             host: host,
             filename: filename,
             transferMode: transferMode,
-            stream: memoryStream, 
-            timeout: TimeSpan.FromSeconds(1), 
-            blockSize: null, 
-            maxTimeoutAttempts: maxTimeoutAttempts, 
+            stream: memoryStream,
+            timeout: TimeSpan.FromSeconds(1),
+            blockSize: null,
+            maxTimeoutAttempts: maxTimeoutAttempts,
             transferChannel: transferMock.Object,
             hostResolver: resolver);
 
@@ -488,7 +488,7 @@ public class DownloadSessionTests
             .Returns(() => Task.Delay(2000).ContinueWith(_ =>
                 new ITransferChannel.ChannelPacket(Array.Empty<byte>(), new IPEndPoint(address, tid))));
 
-        
+
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
             host: host,

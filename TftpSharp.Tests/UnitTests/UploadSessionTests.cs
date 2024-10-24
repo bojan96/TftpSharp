@@ -7,11 +7,11 @@ using TftpSharp.Exceptions;
 using TftpSharp.Packet;
 using TftpSharp.TransferChannel;
 
-namespace TftpSharp.Tests;
+namespace TftpSharp.Tests.UnitTests;
 
 public class UploadSessionTests
 {
-    
+
     [Fact]
     public async Task UploadLessThanDefaultBlockSize()
     {
@@ -31,7 +31,7 @@ public class UploadSessionTests
         transferMock
             .InSequence(mockSequence)
             .Setup(ch => ch.SendTftpPacketAsync(
-                It.Is<Packet.Packet>(p => p.Type == Packet.Packet.PacketType.WRQ && 
+                It.Is<Packet.Packet>(p => p.Type == Packet.Packet.PacketType.WRQ &&
                                           ((WriteRequestPacket)p).Filename == filename && ((WriteRequestPacket)p).TransferMode == transferMode),
                 new IPEndPoint(address, port),
                 It.IsAny<CancellationToken>()))
@@ -59,13 +59,13 @@ public class UploadSessionTests
 
         using var memoryStream = new MemoryStream(payload);
         var uploadSession = new UploadSession(
-            host: host, 
-            filename: filename, 
-            transferMode: transferMode, 
-            stream: memoryStream, 
-            timeout: TimeSpan.FromSeconds(1), 
-            blockSize: null, 
-            maxTimeoutAttempts: maxTimeoutAttempts, 
+            host: host,
+            filename: filename,
+            transferMode: transferMode,
+            stream: memoryStream,
+            timeout: TimeSpan.FromSeconds(1),
+            blockSize: null,
+            maxTimeoutAttempts: maxTimeoutAttempts,
             transferChannel: transferMock.Object,
             hostResolver: resolver);
 
@@ -90,7 +90,7 @@ public class UploadSessionTests
         var transferMock = new Mock<ITransferChannel>(MockBehavior.Strict);
         transferMock
             .Setup(ch => ch.SendTftpPacketAsync(
-            It.Is<Packet.Packet>(p => p.Type == Packet.Packet.PacketType.WRQ 
+            It.Is<Packet.Packet>(p => p.Type == Packet.Packet.PacketType.WRQ
                                       && ((WriteRequestPacket)p).Filename == filename
                                       && ((WriteRequestPacket)p).TransferMode == transferMode),
             new IPEndPoint(address, port),
@@ -109,9 +109,9 @@ public class UploadSessionTests
             host: host,
             filename: filename,
             transferMode: transferMode,
-            stream: memoryStream, 
-            timeout: TimeSpan.FromSeconds(1), 
-            blockSize: null, 
+            stream: memoryStream,
+            timeout: TimeSpan.FromSeconds(1),
+            blockSize: null,
             maxTimeoutAttempts: maxTimeoutAttempts,
             transferChannel: transferMock.Object,
             hostResolver: resolver);
@@ -401,8 +401,8 @@ public class UploadSessionTests
             .InSequence(mockSequence)
             .Setup(ch => ch.SendTftpPacketAsync(
                 It.Is<Packet.Packet>(p => p.Type == Packet.Packet.PacketType.WRQ &&
-                                          ((WriteRequestPacket)p).Filename == filename 
-                                          && ((WriteRequestPacket)p).TransferMode == transferMode 
+                                          ((WriteRequestPacket)p).Filename == filename
+                                          && ((WriteRequestPacket)p).TransferMode == transferMode
                                           && ((WriteRequestPacket)p).Options.GetValueOrDefault("blksize") == blockSize.ToString()),
                 new IPEndPoint(address, port),
                 It.IsAny<CancellationToken>()))
