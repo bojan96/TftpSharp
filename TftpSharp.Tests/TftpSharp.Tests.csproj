@@ -27,4 +27,25 @@
     <ProjectReference Include="..\TftpSharp\TftpSharp.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="IntegrationTests\FilesToUpload\1024">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="IntegrationTests\FilesToUpload\511">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="IntegrationTests\FilesToUpload\513">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="IntegrationTests\ServerRoot\1024">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="IntegrationTests\ServerRoot\511">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="IntegrationTests\ServerRoot\513">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
