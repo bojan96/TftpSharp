@@ -40,7 +40,7 @@ namespace TftpSharp.Packet
 
                 case Packet.PacketType.OACK:
                     IEnumerable<byte> bytes = packetBytes.Skip(2);
-                    var options = new Dictionary<string, string>();
+                    var options = new OackPacket.CaseInsensitiveDictionary();
 
                     while (bytes.Any())
                     {

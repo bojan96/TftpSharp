@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -6,6 +7,16 @@ namespace TftpSharp.Packet;
 
 internal class OackPacket : Packet
 {
+
+    public class CaseInsensitiveDictionary : Dictionary<string, string>
+    {
+        public CaseInsensitiveDictionary() : base(StringComparer.OrdinalIgnoreCase)
+        {
+            
+        }
+    }
+
+
     public IReadOnlyDictionary<string, string> Options { get; }
 
     public OackPacket(IReadOnlyDictionary<string, string> options) : base(PacketType.OACK)

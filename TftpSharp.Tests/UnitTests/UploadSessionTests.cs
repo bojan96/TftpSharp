@@ -410,7 +410,8 @@ public class UploadSessionTests
 
         transferMock.InSequence(mockSequence)
             .Setup(ch => ch.ReceiveFromAddressAsync(address, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ITransferChannel.ChannelPacket(new OackPacket(new Dictionary<string, string>() {
+            .ReturnsAsync(new ITransferChannel.ChannelPacket(new OackPacket(new OackPacket.CaseInsensitiveDictionary
+                {
                 {
                     "blksize", blockSize.ToString()
                 }}).Serialize(),
