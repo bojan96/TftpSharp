@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading;
@@ -23,8 +24,11 @@ internal class UploadSession
     private readonly int _maxTimeoutAttempts;
     public readonly ITransferChannel _transferChannel;
     private readonly IHostResolver _hostResolver;
+    private readonly bool _negotiateSize;
 
-    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout, int? blockSize, int maxTimeoutAttempts, ITransferChannel transferChannel, IHostResolver hostResolver)
+    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout,
+        int? blockSize, int maxTimeoutAttempts, ITransferChannel transferChannel, IHostResolver hostResolver,
+        bool negotiateSize)
     {
         _host = host;
         _filename = filename;
@@ -35,6 +39,7 @@ internal class UploadSession
         _maxTimeoutAttempts = maxTimeoutAttempts;
         _transferChannel = transferChannel;
         _hostResolver = hostResolver;
+        _negotiateSize = negotiateSize;
     }
 
 
@@ -44,15 +49,24 @@ internal class UploadSession
         var context = new TftpContext(_transferChannel, _stream, _filename, _transferMode, 69, sessionHostIp)
         {
             Timeout = _timeout,
-            MaxTimeoutAttempts = _maxTimeoutAttempts
+            MaxTimeoutAttempts = _maxTimeoutAttempts,
+            NegotiateSize = _negotiateSize
         };
+
         if(_blockSize is not null)
             context.Options.Add("blksize", _blockSize.ToString()!);
+
+        try
+        {
+            if(_negotiateSize)
+                context.Options.Add("tsize", _stream.Length.ToString());
+        }
+        catch (NotSupportedException)
+        {
+        }
 
         var stateMachineRunner = new StateMachineRunner();
         await stateMachineRunner.RunAsync(new SendWrqState(1), context,
              cancellationToken);
-
     }
-
 }

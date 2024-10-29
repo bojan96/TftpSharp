@@ -28,6 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="IntegrationTests\ServerRoot\1024_size_test">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="IntegrationTests\FilesToUpload\1024">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

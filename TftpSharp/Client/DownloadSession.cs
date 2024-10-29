@@ -22,8 +22,9 @@ internal class DownloadSession
     private readonly int _maxTimeoutAttempts;
     private readonly ITransferChannel _transferChannel;
     private readonly IHostResolver _hostResolver;
+    private readonly bool _negotiateSize;
 
-    public DownloadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout, int? blockSize, int maxTimeoutAttempts, ITransferChannel transferChannel, IHostResolver hostResolver)
+    public DownloadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout, int? blockSize, int maxTimeoutAttempts, ITransferChannel transferChannel, IHostResolver hostResolver, bool negotiateSize)
     {
         _host = host;
         _filename = filename;
@@ -34,6 +35,7 @@ internal class DownloadSession
         _maxTimeoutAttempts = maxTimeoutAttempts;
         _transferChannel = transferChannel;
         _hostResolver = hostResolver;
+        _negotiateSize = negotiateSize;
     }
 
     public async Task Start(CancellationToken cancellationToken = default)
@@ -43,9 +45,13 @@ internal class DownloadSession
         {
             Timeout = _timeout,
             MaxTimeoutAttempts = _maxTimeoutAttempts,
+            NegotiateSize = _negotiateSize
         };
         if (_blockSize is not null)
             context.Options.Add("blksize", _blockSize.ToString()!);
+
+        if(_negotiateSize)
+            context.Options.Add("tsize", "0");
 
         var stateMachineRunner = new StateMachineRunner();
         await stateMachineRunner.RunAsync(new SendRrqState(1), context,

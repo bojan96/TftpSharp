@@ -67,7 +67,8 @@ public class UploadSessionTests
             blockSize: null,
             maxTimeoutAttempts: maxTimeoutAttempts,
             transferChannel: transferMock.Object,
-            hostResolver: resolver);
+            hostResolver: resolver, 
+            negotiateSize: false);
 
         await uploadSession.Start();
 
@@ -114,7 +115,8 @@ public class UploadSessionTests
             blockSize: null,
             maxTimeoutAttempts: maxTimeoutAttempts,
             transferChannel: transferMock.Object,
-            hostResolver: resolver);
+            hostResolver: resolver, 
+            negotiateSize: false);
 
 
         await Assert.ThrowsAsync<TftpTimeoutException>(async () => await uploadSession.Start());
@@ -177,7 +179,8 @@ public class UploadSessionTests
             blockSize: null,
             maxTimeoutAttempts: maxTimeoutAttempts,
             transferChannel: transferMock.Object,
-            hostResolver: resolver);
+            hostResolver: resolver, 
+            negotiateSize: false);
 
 
         await Assert.ThrowsAsync<TftpTimeoutException>(async () => await uploadSession.Start());
@@ -264,7 +267,8 @@ public class UploadSessionTests
             blockSize: null,
             maxTimeoutAttempts: maxTimeoutAttempts,
             transferChannel: transferMock.Object,
-            hostResolver: resolver);
+            hostResolver: resolver, 
+            negotiateSize: false);
 
 
         await uploadSession.Start();
@@ -312,7 +316,8 @@ public class UploadSessionTests
             blockSize: null,
             maxTimeoutAttempts: maxTimeoutAttempts,
             transferChannel: transferMock.Object,
-            hostResolver: resolver);
+            hostResolver: resolver, 
+            negotiateSize: false);
 
 
         var exception = await Assert.ThrowsAsync<TftpErrorResponseException>(async () => await uploadSession.Start());
@@ -372,7 +377,8 @@ public class UploadSessionTests
             blockSize: null,
             maxTimeoutAttempts: maxTimeoutAttempts,
             transferChannel: transferMock.Object,
-            hostResolver: resolver);
+            hostResolver: resolver, 
+            negotiateSize: false);
 
 
         var exception = await Assert.ThrowsAsync<TftpErrorResponseException>(async () => await uploadSession.Start());
@@ -441,7 +447,8 @@ public class UploadSessionTests
             blockSize: blockSize,
             maxTimeoutAttempts: maxTimeoutAttempts,
             transferChannel: transferMock.Object,
-            hostResolver: resolver);
+            hostResolver: resolver, 
+            negotiateSize: false);
 
         await uploadSession.Start();
 
@@ -517,8 +524,78 @@ public class UploadSessionTests
             blockSize: null,
             maxTimeoutAttempts: maxTimeoutAttempts,
             transferChannel: transferMock.Object,
-            hostResolver: resolver);
+            hostResolver: resolver, 
+            negotiateSize: false);
 
+
+        await uploadSession.Start();
+
+        Assert.Equal(payload, memoryStream.ToArray());
+    }
+
+    [Fact]
+    public async Task UploadWithNegotiatedSize()
+    {
+        const int maxTimeoutAttempts = 1;
+        const string filename = "test";
+        const TransferMode transferMode = TransferMode.Octet;
+        const string host = "test";
+        const int port = 69;
+        const int tid = 0;
+        const bool negotiateSize = true;
+        var address = IPAddress.Loopback;
+        var payload = Enumerable.Repeat((byte)1, 511).ToArray();
+
+        var resolver = GetMockResolver(host, address);
+        var transferMock = new Mock<ITransferChannel>(MockBehavior.Strict);
+
+        var mockSequence = new MockSequence();
+        transferMock
+            .InSequence(mockSequence)
+            .Setup(ch => ch.SendTftpPacketAsync(
+                It.Is<Packet.Packet>(p => p.Type == Packet.Packet.PacketType.WRQ 
+                                          && ((WriteRequestPacket)p).Filename == filename 
+                                          && ((WriteRequestPacket)p).TransferMode == transferMode
+                                          && ((WriteRequestPacket)p).Options["tsize"] == payload.Length.ToString()),
+                new IPEndPoint(address, port),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        transferMock.InSequence(mockSequence)
+            .Setup(ch => ch.ReceiveFromAddressAsync(address, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ITransferChannel.ChannelPacket(new OackPacket(new OackPacket.CaseInsensitiveDictionary
+                {
+                {
+                    "tsize", payload.Length.ToString()
+                }}).Serialize(),
+                new IPEndPoint(address, tid)));
+
+        transferMock.
+            InSequence(mockSequence)
+            .Setup(ch =>
+                ch.SendTftpPacketAsync(
+                    It.Is<Packet.Packet>(p =>
+                        p.Type == Packet.Packet.PacketType.DATA && ((DataPacket)p).BlockNumber == 1 && ((DataPacket)p).Data.SequenceEqual(payload)),
+                    new IPEndPoint(address, tid), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        transferMock
+            .InSequence(mockSequence)
+            .Setup(ch => ch.ReceiveFromAddressAsync(address, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ITransferChannel.ChannelPacket(new AckPacket(1).Serialize(),
+                new IPEndPoint(address, tid)));
+
+        using var memoryStream = new MemoryStream(payload);
+        var uploadSession = new UploadSession(
+            host: host,
+            filename: filename,
+            transferMode: transferMode,
+            stream: memoryStream,
+            timeout: TimeSpan.FromSeconds(1),
+            blockSize: null,
+            maxTimeoutAttempts: maxTimeoutAttempts,
+            transferChannel: transferMock.Object,
+            hostResolver: resolver,
+            negotiateSize: negotiateSize);
 
         await uploadSession.Start();
 
