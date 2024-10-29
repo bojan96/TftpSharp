@@ -23,8 +23,19 @@ internal class DownloadSession
     private readonly ITransferChannel _transferChannel;
     private readonly IHostResolver _hostResolver;
     private readonly bool _negotiateSize;
+    private readonly bool _negotiateTimeout;
 
-    public DownloadSession(string host, string filename, TransferMode transferMode, Stream stream, int timeout, int? blockSize, int maxTimeoutAttempts, ITransferChannel transferChannel, IHostResolver hostResolver, bool negotiateSize)
+    public DownloadSession(string host,
+                           string filename,
+                           TransferMode transferMode,
+                           Stream stream,
+                           int timeout,
+                           int? blockSize,
+                           int maxTimeoutAttempts,
+                           ITransferChannel transferChannel,
+                           IHostResolver hostResolver,
+                           bool negotiateSize,
+                           bool negotiateTimeout)
     {
         _host = host;
         _filename = filename;
@@ -36,6 +47,7 @@ internal class DownloadSession
         _transferChannel = transferChannel;
         _hostResolver = hostResolver;
         _negotiateSize = negotiateSize;
+        _negotiateTimeout = negotiateTimeout;
     }
 
     public async Task Start(CancellationToken cancellationToken = default)
@@ -45,13 +57,17 @@ internal class DownloadSession
         {
             Timeout = _timeout,
             MaxTimeoutAttempts = _maxTimeoutAttempts,
-            NegotiateSize = _negotiateSize
+            NegotiateSize = _negotiateSize,
+            NegotiateTimeout = _negotiateTimeout
         };
         if (_blockSize is not null)
             context.Options.Add("blksize", _blockSize.ToString()!);
 
         if(_negotiateSize)
             context.Options.Add("tsize", "0");
+
+        if(_negotiateTimeout)
+            context.Options.Add("timeout", _timeout.ToString());
 
         var stateMachineRunner = new StateMachineRunner();
         await stateMachineRunner.RunAsync(new SendRrqState(1), context,

@@ -35,6 +35,21 @@ public class DownloadTests
     }
 
     [Fact]
+    public async Task DownloadSuccessfullyWithNegotiatedTimeout()
+    {
+        var tftpClient = new TftpClient("localhost")
+        {
+            NegotiateTimeout = true
+        };
+
+        var memoryStream = new MemoryStream();
+        await tftpClient.DownloadStreamAsync("1024", memoryStream);
+
+        var hash = Util.HashData(memoryStream.ToArray());
+        Assert.Equal("9f1d3e745b390350c25cd526a14fb3743111d155", hash, true);
+    }
+
+    [Fact]
     public async Task DownloadNonExistentFile()
     {
         var tftpClient = new TftpClient("localhost")

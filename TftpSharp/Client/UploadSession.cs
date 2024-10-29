@@ -25,10 +25,19 @@ internal class UploadSession
     public readonly ITransferChannel _transferChannel;
     private readonly IHostResolver _hostResolver;
     private readonly bool _negotiateSize;
+    private readonly bool _negotiateTimeout;
 
-    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, int timeout,
-        int? blockSize, int maxTimeoutAttempts, ITransferChannel transferChannel, IHostResolver hostResolver,
-        bool negotiateSize)
+    public UploadSession(string host,
+                         string filename,
+                         TransferMode transferMode,
+                         Stream stream,
+                         int timeout,
+                         int? blockSize,
+                         int maxTimeoutAttempts,
+                         ITransferChannel transferChannel,
+                         IHostResolver hostResolver,
+                         bool negotiateSize,
+                         bool negotiateTimeout)
     {
         _host = host;
         _filename = filename;
@@ -40,6 +49,7 @@ internal class UploadSession
         _transferChannel = transferChannel;
         _hostResolver = hostResolver;
         _negotiateSize = negotiateSize;
+        _negotiateTimeout = negotiateTimeout;
     }
 
 
@@ -50,7 +60,8 @@ internal class UploadSession
         {
             Timeout = _timeout,
             MaxTimeoutAttempts = _maxTimeoutAttempts,
-            NegotiateSize = _negotiateSize
+            NegotiateSize = _negotiateSize,
+            NegotiateTimeout = _negotiateTimeout,
         };
 
         if(_blockSize is not null)
@@ -64,6 +75,9 @@ internal class UploadSession
         catch (NotSupportedException)
         {
         }
+
+        if(_negotiateTimeout)
+            context.Options.Add("timeout", _timeout.ToString());
 
         var stateMachineRunner = new StateMachineRunner();
         await stateMachineRunner.RunAsync(new SendWrqState(1), context,

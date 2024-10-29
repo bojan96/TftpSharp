@@ -32,4 +32,5 @@ internal class TftpContext
     public Dictionary<string, string> Options { get; } = new();
     public int BlockSize { get; set; } = 512;
     public bool NegotiateSize { get; set; }
+    public bool NegotiateTimeout { get; set; }
 }

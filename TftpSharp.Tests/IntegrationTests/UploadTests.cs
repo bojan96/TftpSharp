@@ -52,6 +52,23 @@ public class UploadTests
         Assert.Equal("9f1d3e745b390350c25cd526a14fb3743111d155", hash, true);
     }
 
+    [Fact]
+    public async Task UploadSuccesfullyWithNegotiatedTimeout()
+    {
+        const string fileToUpload = "1024";
+        var tftpClient = new TftpClient("localhost")
+        {
+            NegotiateTimeout = true,
+        };
+        var memoryStream = new MemoryStream(await File.ReadAllBytesAsync(GetFileUploadPath(fileToUpload)));
+        var uploadedFilename = $"{fileToUpload}_size_test";
+
+        await tftpClient.UploadStreamAsync(uploadedFilename, memoryStream);
+
+        var hash = Util.HashData(await File.ReadAllBytesAsync(GetServerRootPath(uploadedFilename)));
+        Assert.Equal("9f1d3e745b390350c25cd526a14fb3743111d155", hash, true);
+    }
+
     private static string GetServerRootPath(string filename) =>
         Path.Combine("IntegrationTests", "ServerRoot", filename);
     private static string GetFileUploadPath(string filename) =>

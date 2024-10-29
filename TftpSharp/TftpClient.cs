@@ -37,6 +37,7 @@ namespace TftpSharp
 
         public TransferMode TransferMode { get; set; } = TransferMode.Octet;
         public bool NegotiateSize { get; set; } = false;
+        public bool NegotiateTimeout { get; set; } = false;
         public int MaxTimeoutAttempts
         {
             get => _maxTimeoutAttempts;
@@ -67,9 +68,18 @@ namespace TftpSharp
             var hostResolver = new DnsHostResolver();
             using var transferChannel = new UdpTransferChannel();
             var session =
-                new DownloadSession(Host, remoteFilename, TransferMode, stream, Timeout, _blockSize, _maxTimeoutAttempts, transferChannel, hostResolver, NegotiateSize);
-            await session.Start(
-                cancellationToken);
+                new DownloadSession(Host,
+                                    remoteFilename,
+                                    TransferMode,
+                                    stream,
+                                    Timeout,
+                                    _blockSize,
+                                    _maxTimeoutAttempts,
+                                    transferChannel,
+                                    hostResolver,
+                                    NegotiateSize,
+                                    NegotiateTimeout);
+            await session.Start(cancellationToken);
         }
 
         public async Task UploadStreamAsync(string remoteFilename, Stream stream,
@@ -78,7 +88,17 @@ namespace TftpSharp
             var hostResolver = new DnsHostResolver();
             using var transferChannel = new UdpTransferChannel();
             var session =
-                new UploadSession(Host, remoteFilename, TransferMode, stream, Timeout, _blockSize, _maxTimeoutAttempts, transferChannel, hostResolver, NegotiateSize);
+                new UploadSession(Host,
+                                  remoteFilename,
+                                  TransferMode,
+                                  stream,
+                                  Timeout,
+                                  _blockSize,
+                                  _maxTimeoutAttempts,
+                                  transferChannel,
+                                  hostResolver,
+                                  NegotiateSize,
+                                  NegotiateTimeout);
             await session.Start(cancellationToken);
         }
         
