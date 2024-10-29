@@ -19,9 +19,22 @@ namespace TftpSharp
         private const int MaxBlockSize = 65464;
         private int? _blockSize;
         private int _maxTimeoutAttempts = 5;
+        private int _timeout = 3;
 
         public string Host { get; }
-        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(3);
+
+        public int Timeout
+        {
+            get => _timeout;
+            set
+            {
+                if (value < 1 || value > 255)
+                    throw new ArgumentOutOfRangeException(nameof(Timeout), "Must be between 1 and 255");
+
+                _timeout = value;
+            }
+        }
+
         public TransferMode TransferMode { get; set; } = TransferMode.Octet;
         public bool NegotiateSize { get; set; } = false;
         public int MaxTimeoutAttempts

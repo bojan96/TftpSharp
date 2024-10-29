@@ -19,14 +19,14 @@ internal class UploadSession
     private readonly string _filename;
     private readonly TransferMode _transferMode;
     private readonly Stream _stream;
-    private readonly TimeSpan _timeout;
+    private readonly int _timeout;
     private readonly int? _blockSize;
     private readonly int _maxTimeoutAttempts;
     public readonly ITransferChannel _transferChannel;
     private readonly IHostResolver _hostResolver;
     private readonly bool _negotiateSize;
 
-    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, TimeSpan timeout,
+    public UploadSession(string host, string filename, TransferMode transferMode, Stream stream, int timeout,
         int? blockSize, int maxTimeoutAttempts, ITransferChannel transferChannel, IHostResolver hostResolver,
         bool negotiateSize)
     {

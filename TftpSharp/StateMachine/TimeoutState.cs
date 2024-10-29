@@ -11,7 +11,7 @@ namespace TftpSharp.StateMachine
             await using var cancellationTokenRegistration =
                 cancellationToken.Register(() => stateCancellationTokenSource.Cancel());
             var stateTask = HandleStateAsync(context, stateCancellationTokenSource.Token);
-            var timeoutTask = Task.Delay(context.Timeout, cancellationToken);
+            var timeoutTask = Task.Delay(context.Timeout * 1000, cancellationToken);
             var resultTask = await Task.WhenAny(stateTask, timeoutTask);
 
             if (resultTask == stateTask)
