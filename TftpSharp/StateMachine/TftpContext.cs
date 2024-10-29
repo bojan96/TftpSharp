@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using TftpSharp.TransferChannel;
+using TftpSharp.Util;
 
 namespace TftpSharp.StateMachine;
 
@@ -29,7 +30,7 @@ internal class TftpContext
     public int Timeout { get; set; }
     public int MaxTimeoutAttempts { get; set; }
     public byte[]? LastReadBlock { get; set; }
-    public Dictionary<string, string> Options { get; } = new();
+    public CaseInsensitiveDictionary Options { get; } = new();
     public int BlockSize { get; set; } = 512;
     public bool NegotiateSize { get; set; }
     public bool NegotiateTimeout { get; set; }

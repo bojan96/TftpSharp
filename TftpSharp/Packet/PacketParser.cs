@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TftpSharp.Exceptions;
+using TftpSharp.Util;
 
 namespace TftpSharp.Packet
 {
@@ -40,7 +41,7 @@ namespace TftpSharp.Packet
 
                 case Packet.PacketType.OACK:
                     IEnumerable<byte> bytes = packetBytes.Skip(2);
-                    var options = new OackPacket.CaseInsensitiveDictionary();
+                    var options = new CaseInsensitiveDictionary();
 
                     while (bytes.Any())
                     {

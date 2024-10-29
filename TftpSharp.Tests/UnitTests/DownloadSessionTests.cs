@@ -1,11 +1,11 @@
 using System.Net;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.ObjectModel;
 using Moq;
 using TftpSharp.Client;
 using TftpSharp.Dns;
 using TftpSharp.Exceptions;
 using TftpSharp.Packet;
 using TftpSharp.TransferChannel;
+using TftpSharp.Util;
 
 namespace TftpSharp.Tests.UnitTests;
 
@@ -393,7 +393,7 @@ public class DownloadSessionTests
 
         transferMock.InSequence(mockSequence)
             .Setup(ch => ch.ReceiveFromAddressAsync(address, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ITransferChannel.ChannelPacket(new OackPacket(new OackPacket.CaseInsensitiveDictionary
+            .ReturnsAsync(new ITransferChannel.ChannelPacket(new OackPacket(new CaseInsensitiveDictionary
                 {
                 {
                     "blksize", blockSize.ToString()
@@ -558,7 +558,7 @@ public class DownloadSessionTests
 
         transferMock.InSequence(mockSequence)
             .Setup(ch => ch.ReceiveFromAddressAsync(address, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ITransferChannel.ChannelPacket(new OackPacket(new OackPacket.CaseInsensitiveDictionary
+            .ReturnsAsync(new ITransferChannel.ChannelPacket(new OackPacket(new CaseInsensitiveDictionary
                 {
                 {
                     "tsize", "0"
@@ -637,7 +637,7 @@ public class DownloadSessionTests
 
         transferMock.InSequence(mockSequence)
             .Setup(ch => ch.ReceiveFromAddressAsync(address, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ITransferChannel.ChannelPacket(new OackPacket(new OackPacket.CaseInsensitiveDictionary
+            .ReturnsAsync(new ITransferChannel.ChannelPacket(new OackPacket(new CaseInsensitiveDictionary
                 {
                 {
                     "timeout", "1"
