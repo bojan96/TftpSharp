@@ -65,7 +65,7 @@ namespace TftpSharp
 
         public TftpClient(string host, int port)
         {
-            if (port < 0 || port > ushort.MaxValue)
+            if (port < IPEndPoint.MinPort || port > IPEndPoint.MaxPort)
                 throw new ArgumentOutOfRangeException(nameof(port), $"Port must be between 0 and {ushort.MaxValue}");
 
             Host = host;
