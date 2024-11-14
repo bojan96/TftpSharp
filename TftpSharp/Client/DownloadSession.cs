@@ -14,6 +14,7 @@ namespace TftpSharp.Client;
 internal class DownloadSession
 {
     private readonly string _host;
+    private readonly int _port;
     private readonly string _filename;
     private readonly TransferMode _transferMode;
     private readonly Stream _stream;
@@ -26,18 +27,20 @@ internal class DownloadSession
     private readonly bool _negotiateTimeout;
 
     public DownloadSession(string host,
-                           string filename,
-                           TransferMode transferMode,
-                           Stream stream,
-                           int timeout,
-                           int? blockSize,
-                           int maxTimeoutAttempts,
-                           ITransferChannel transferChannel,
-                           IHostResolver hostResolver,
-                           bool negotiateSize,
-                           bool negotiateTimeout)
+        int port,
+        string filename,
+        TransferMode transferMode,
+        Stream stream,
+        int timeout,
+        int? blockSize,
+        int maxTimeoutAttempts,
+        ITransferChannel transferChannel,
+        IHostResolver hostResolver,
+        bool negotiateSize,
+        bool negotiateTimeout)
     {
         _host = host;
+        _port = port;
         _filename = filename;
         _transferMode = transferMode;
         _stream = stream;
@@ -53,7 +56,7 @@ internal class DownloadSession
     public async Task Start(CancellationToken cancellationToken = default)
     {
         var sessionHostIp = await _hostResolver.ResolveHostToIpv4AddressAsync(_host, cancellationToken);
-        var context = new TftpContext(_transferChannel, _stream, _filename, _transferMode, 69, sessionHostIp)
+        var context = new TftpContext(_transferChannel, _stream, _filename, _transferMode, _port, sessionHostIp)
         {
             Timeout = _timeout,
             MaxTimeoutAttempts = _maxTimeoutAttempts,

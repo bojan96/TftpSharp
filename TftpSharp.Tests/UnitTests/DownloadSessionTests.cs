@@ -57,6 +57,7 @@ public class DownloadSessionTests
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
             host: host,
+            port: port,
             filename: filename,
             transferMode: transferMode, stream: memoryStream, 
             timeout: 1,
@@ -104,7 +105,8 @@ public class DownloadSessionTests
 
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -164,7 +166,8 @@ public class DownloadSessionTests
 
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -237,7 +240,8 @@ public class DownloadSessionTests
 
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -285,7 +289,8 @@ public class DownloadSessionTests
 
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -347,7 +352,8 @@ public class DownloadSessionTests
 
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -437,7 +443,8 @@ public class DownloadSessionTests
 
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -511,7 +518,8 @@ public class DownloadSessionTests
 
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -592,7 +600,8 @@ public class DownloadSessionTests
 
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode, stream: memoryStream,
             timeout: 1,
@@ -671,7 +680,8 @@ public class DownloadSessionTests
 
         using var memoryStream = new MemoryStream();
         var downloadSession = new DownloadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode, stream: memoryStream,
             timeout: 1,

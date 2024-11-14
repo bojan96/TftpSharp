@@ -22,6 +22,7 @@ namespace TftpSharp
         private int _timeout = 3;
 
         public string Host { get; }
+        public int Port { get; }
 
         public int Timeout
         {
@@ -57,9 +58,18 @@ namespace TftpSharp
             }
         }
 
-        public TftpClient(string host)
+        public TftpClient(string host) : this(host, 69)
         {
+
+        }
+
+        public TftpClient(string host, int port)
+        {
+            if (port < 0 || port > ushort.MaxValue)
+                throw new ArgumentOutOfRangeException(nameof(port), $"Port must be between 0 and {ushort.MaxValue}");
+
             Host = host;
+            Port = port;
         }
 
         public async Task DownloadStreamAsync(string remoteFilename, Stream stream,
@@ -69,6 +79,7 @@ namespace TftpSharp
             using var transferChannel = new UdpTransferChannel();
             var session =
                 new DownloadSession(Host,
+                                    Port,
                                     remoteFilename,
                                     TransferMode,
                                     stream,
@@ -89,6 +100,7 @@ namespace TftpSharp
             using var transferChannel = new UdpTransferChannel();
             var session =
                 new UploadSession(Host,
+                                  Port,
                                   remoteFilename,
                                   TransferMode,
                                   stream,

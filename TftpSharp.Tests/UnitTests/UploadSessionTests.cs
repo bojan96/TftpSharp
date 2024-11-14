@@ -60,7 +60,8 @@ public class UploadSessionTests
 
         using var memoryStream = new MemoryStream(payload);
         var uploadSession = new UploadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -109,7 +110,8 @@ public class UploadSessionTests
 
         using var memoryStream = new MemoryStream();
         var uploadSession = new UploadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -174,7 +176,8 @@ public class UploadSessionTests
 
         using var memoryStream = new MemoryStream(payload);
         var uploadSession = new UploadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -263,7 +266,8 @@ public class UploadSessionTests
 
         using var memoryStream = new MemoryStream(payload);
         var uploadSession = new UploadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -313,7 +317,8 @@ public class UploadSessionTests
 
         using var memoryStream = new MemoryStream();
         var uploadSession = new UploadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -375,7 +380,8 @@ public class UploadSessionTests
 
         using var memoryStream = new MemoryStream();
         var uploadSession = new UploadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -446,7 +452,8 @@ public class UploadSessionTests
 
         using var memoryStream = new MemoryStream(payload);
         var uploadSession = new UploadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -524,7 +531,8 @@ public class UploadSessionTests
 
         using var memoryStream = new MemoryStream(payload);
         var uploadSession = new UploadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -594,7 +602,8 @@ public class UploadSessionTests
 
         using var memoryStream = new MemoryStream(payload);
         var uploadSession = new UploadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,
@@ -663,7 +672,8 @@ public class UploadSessionTests
 
         using var memoryStream = new MemoryStream(payload);
         var uploadSession = new UploadSession(
-            host: host,
+            host: host, 
+            port: port, 
             filename: filename,
             transferMode: transferMode,
             stream: memoryStream,

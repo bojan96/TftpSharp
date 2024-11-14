@@ -28,16 +28,17 @@ internal class UploadSession
     private readonly bool _negotiateTimeout;
 
     public UploadSession(string host,
-                         string filename,
-                         TransferMode transferMode,
-                         Stream stream,
-                         int timeout,
-                         int? blockSize,
-                         int maxTimeoutAttempts,
-                         ITransferChannel transferChannel,
-                         IHostResolver hostResolver,
-                         bool negotiateSize,
-                         bool negotiateTimeout)
+        int port,
+        string filename,
+        TransferMode transferMode,
+        Stream stream,
+        int timeout,
+        int? blockSize,
+        int maxTimeoutAttempts,
+        ITransferChannel transferChannel,
+        IHostResolver hostResolver,
+        bool negotiateSize,
+        bool negotiateTimeout)
     {
         _host = host;
         _filename = filename;
