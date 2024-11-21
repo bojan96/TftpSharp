@@ -17,6 +17,8 @@ internal abstract class ReceiveState : TimeoutState
             try
             {
                 var result = await context.Channel.ReceiveFromAddressAsync(context.Host, cancellationToken);
+                // TODO: Support invalid transfer id
+
                 var packet = PacketParser.Parse(result.Buffer);
                 state = await HandleReceiveStateAsync(packet, context, cancellationToken);
                 retry = state is null;
