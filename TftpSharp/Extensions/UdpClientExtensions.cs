@@ -14,11 +14,7 @@ namespace TftpSharp.Extensions
             CancellationToken cancellationToken = default)
         {
             var packetBytes = packet.Serialize();
-            var bytesSent = 0;
-            while (bytesSent < packetBytes.Length)
-            {
-                bytesSent = await client.SendAsync(packetBytes, endpoint, cancellationToken);
-            }
+            await client.SendAsync(packetBytes, endpoint, cancellationToken);
         }
 
         public static async Task<UdpReceiveResult> ReceiveFromAddressAsync(this UdpClient client, IPAddress address, CancellationToken cancellationToken = default)
