@@ -59,9 +59,7 @@ internal class DownloadSession
         var context = new TftpContext(_transferChannel, _stream, _filename, _transferMode, _port, sessionHostIp)
         {
             Timeout = _timeout,
-            MaxTimeoutAttempts = _maxTimeoutAttempts,
-            NegotiateSize = _negotiateSize,
-            NegotiateTimeout = _negotiateTimeout
+            MaxTimeoutAttempts = _maxTimeoutAttempts
         };
         if (_blockSize is not null)
             context.Options.Add("blksize", _blockSize.ToString()!);

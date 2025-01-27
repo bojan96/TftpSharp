@@ -60,9 +60,7 @@ internal class UploadSession
         var context = new TftpContext(_transferChannel, _stream, _filename, _transferMode, 69, sessionHostIp)
         {
             Timeout = _timeout,
-            MaxTimeoutAttempts = _maxTimeoutAttempts,
-            NegotiateSize = _negotiateSize,
-            NegotiateTimeout = _negotiateTimeout,
+            MaxTimeoutAttempts = _maxTimeoutAttempts
         };
 
         if(_blockSize is not null)
